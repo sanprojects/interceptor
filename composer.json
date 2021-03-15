@@ -24,6 +24,6 @@
 
   },
   "autoload": {
-    "psr-4": {"Sanprojects\\": ""}
+    "psr-4": {"Sanprojects\\Interceptor\\": "src/"}
   }
 }
