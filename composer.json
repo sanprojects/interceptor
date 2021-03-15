@@ -1,0 +1,29 @@
+{
+  "name": "sanprojects/interceptor",
+  "type": "library",
+  "description": "Intercept php functions",
+  "keywords": ["intercept", "functions", "curl"],
+  "homepage": "https://github.com/sanprojects/interceptor",
+  "license": "MIT",
+  "support": {
+    "issues": "https://github.com/sanprojects/interceptor/issues"
+  },
+  "authors": [
+    {
+      "name": "SAN",
+      "homepage": "https://sanstv.ru"
+    }
+  ],
+  "require": {
+    "php": ">=7.4"
+  },
+  "require-dev": {
+
+  },
+  "suggest": {
+
+  },
+  "autoload": {
+    "psr-4": {"Sanprojects\\": ""}
+  }
+}

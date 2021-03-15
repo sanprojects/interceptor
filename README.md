@@ -1,4 +1,4 @@
-# interceptor
+# Interceptor
 Intercept php functions
 
 ## Usage
