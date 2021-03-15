@@ -24,7 +24,6 @@
   "suggest": {
 
   },
-  "version": "1.0.0",
   "autoload": {
     "psr-4": {"Sanprojects\\Interceptor\\": "src/"}
   }
