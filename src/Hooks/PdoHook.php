@@ -19,7 +19,7 @@ class PdoHook extends PDO
 
     public function exec($statement)
     {
-        $result = parent::exec($statement);
+        $result = parent::exec(...func_get_args());
         Logger::debug("exec()=$result");
 
         return $result;
@@ -27,7 +27,7 @@ class PdoHook extends PDO
 
     public function prepare($statement, $options = NULL)
     {
-        $result = parent::prepare($statement, $options);
+        $result = parent::prepare(...func_get_args());
         Logger::debug("PDO::prepare($statement)");
 
         return $result;

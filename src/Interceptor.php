@@ -2,6 +2,10 @@
 
 namespace Sanprojects\Interceptor;
 
+use Sanprojects\Interceptor\Hooks\CurlHook;
+use Sanprojects\Interceptor\Hooks\FileHook;
+use Sanprojects\Interceptor\Hooks\PdoHook;
+
 /**
  * Implementation adapted from:
  * https://github.com/antecedent/patchwork/blob/418a9aae80ca3228d6763a2dc6d9a30ade7a4e7e/lib/Preprocessor/Stream.php.
@@ -647,5 +651,22 @@ class Interceptor extends \php_user_filter
         static::$hooks[] = $hook;
 
         return $this;
+    }
+
+    public function addAllHooks(): self
+    {
+        return $this
+            ->addHook([CurlHook::class, 'filter'])
+            ->addHook([FileHook::class, 'filter'])
+            ->addHook([PdoHook::class, 'filter']);
+    }
+
+    public static function interceptAll(): self
+    {
+        $interceptor = new Interceptor();
+        $interceptor->addAllHooks();
+        $interceptor->intercept();
+
+        return $interceptor;
     }
 }

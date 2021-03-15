@@ -24,7 +24,7 @@ class CurlHook extends Hook
         self::$curlOpts[$chNumber] = self::$curlOpts[$chNumber] ?? [];
         self::$curlOpts[$chNumber] = $options + self::$curlOpts[$chNumber];
 
-        return \curl_setopt_array($ch, $options);
+        return \curl_setopt_array(...func_get_args());
     }
 
     public static function curl_setopt($ch, $option, $value)
@@ -33,7 +33,7 @@ class CurlHook extends Hook
         self::$curlOpts[$chNumber] = self::$curlOpts[$chNumber] ?? [];
         self::$curlOpts[$chNumber][$option] = $value;
 
-        return \curl_setopt($ch, $option, $value);
+        return \curl_setopt(...func_get_args());
     }
 
     public static function curl_exec($ch)
@@ -129,7 +129,7 @@ class CurlHook extends Hook
         Logger::debug(implode("\n", $result));
         curl_setopt($ch, CURLOPT_VERBOSE, true);
 
-        $content = \curl_exec($ch);
+        $content = \curl_exec(...func_get_args());
 
         $result = [];
         if (!$isWriteFunction) {
@@ -152,6 +152,6 @@ class CurlHook extends Hook
     {
         Logger::debug('curl_multi_exec');
 
-        return \curl_multi_exec($mh, $still_running);
+        return \curl_multi_exec(...func_get_args());
     }
 }

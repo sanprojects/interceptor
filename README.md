@@ -2,10 +2,11 @@
 Intercept php functions
 
 ## Usage
+```shell script
+composer require sanprojects/interceptor
 ```
-$transformer = new Interceptor();
-$transformer->addHook([CurlHook::class, 'filter']);
-$transformer->addHook([FileHook::class, 'filter']);
-$transformer->addHook([PdoHook::class, 'filter']);
-$transformer->intercept();
+In php bootstrap:
+```php
+// intercept newly included files
+Interceptor::interceptAll();
 ```

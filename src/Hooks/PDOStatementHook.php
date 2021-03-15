@@ -20,7 +20,7 @@ class PDOStatementHook extends PDOStatement
 
     public function bindValue($parameter, $value, $data_type = PDO::PARAM_STR)
     {
-        $result = parent::bindValue($parameter, $value, $data_type);
+        $result = parent::bindValue(...func_get_args());
         Logger::debug("PDOStatementHook::bindValue($parameter, $value)");
 
         return $result;
@@ -28,7 +28,7 @@ class PDOStatementHook extends PDOStatement
 
     public function execute($input_parameters = null)
     {
-        $result = parent::execute($input_parameters);
+        $result = parent::execute(...func_get_args());
         Logger::debug("PDOStatementHook::execute()");
 
         return $result;
