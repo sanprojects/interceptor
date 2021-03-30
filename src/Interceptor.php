@@ -2,9 +2,10 @@
 
 namespace Sanprojects\Interceptor;
 
+use Psr\Log\LoggerInterface;
 use Sanprojects\Interceptor\Hooks\CurlHook;
 use Sanprojects\Interceptor\Hooks\FileHook;
-use Sanprojects\Interceptor\Hooks\PdoHook;
+use Sanprojects\Interceptor\Hooks\PDOHook;
 
 /**
  * Implementation adapted from:
@@ -14,6 +15,8 @@ use Sanprojects\Interceptor\Hooks\PdoHook;
  * @license    http://www.opensource.org/licenses/mit-license.html
  *
  * @see       http://antecedent.github.com/patchwork
+ * @see       https://github.com/php-vcr/php-vcr/blob/master/src/VCR/Util/StreamProcessor.php
+ * @see       https://github.com/goaop/ast-manipulator/blob/master/src/Hook/StreamWrapperHook.php
  */
 class Interceptor extends \php_user_filter
 {
@@ -44,12 +47,14 @@ class Interceptor extends \php_user_filter
     /**
      * @var bool
      */
-    protected $isIntercepting = false;
+    protected bool $isIntercepting = false;
 
     /**
      * @var callable[] transformers which have been appended to this stream processor
      */
     protected static array $hooks = [];
+
+    protected LoggerInterface $logger;
 
     public function __construct()
     {
@@ -656,9 +661,9 @@ class Interceptor extends \php_user_filter
     public function addAllHooks(): self
     {
         return $this
-            ->addHook([CurlHook::class, 'filter'])
-            ->addHook([FileHook::class, 'filter'])
-            ->addHook([PdoHook::class, 'filter']);
+            ->addHook([new CurlHook(), 'filter'])
+            ->addHook([new FileHook(), 'filter'])
+            ->addHook([new PDOHook(), 'filter']);
     }
 
     public static function interceptAll(): self
@@ -668,5 +673,16 @@ class Interceptor extends \php_user_filter
         $interceptor->intercept();
 
         return $interceptor;
+    }
+
+    /**
+     * Sets logger
+     *
+     * @param \Psr\Log\LoggerInterface $logger Logger
+     * @return void
+     */
+    public function setLogger(LoggerInterface $logger): void
+    {
+        $this->logger = $logger;
     }
 }
