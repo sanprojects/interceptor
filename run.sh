@@ -14,7 +14,11 @@ test() {
 }
 
 install() {
-    composer install --ignore-platform-reqs
+    composer install
+}
+
+update() {
+    composer update
 }
 
 ${1:-help} || help

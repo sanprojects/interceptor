@@ -1,11 +1,11 @@
 # Interceptor
 Intercept php functions
 
-## Usage
+## Installation
 ```shell script
-composer require sanprojects/interceptor
+composer require sanprojects/interceptor:dev-main
 ```
-In php bootstrap:
+## Basic Usage:
 ```php
 // intercept newly included files
 Interceptor::interceptAll();

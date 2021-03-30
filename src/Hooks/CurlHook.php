@@ -2,15 +2,8 @@
 
 namespace Sanprojects\Interceptor\Hooks;
 
-use Sanprojects\Interceptor\Logger;
-
 class CurlHook extends Hook
 {
-    /**
-     * @var string current status of this hook, either enabled or disabled
-     */
-    protected static $curlOpts = [];
-
     protected const HOOKED_FUNCTIONS = [
         'curl_exec',
         'curl_setopt',
@@ -18,13 +11,25 @@ class CurlHook extends Hook
         'curl_multi_exec',
     ];
 
+    protected const CURL_VERSIONS = [
+        CURL_HTTP_VERSION_NONE => '',
+        CURL_HTTP_VERSION_1_0 => '--http1.0',
+        CURL_HTTP_VERSION_1_1 => '--http1.1',
+        CURL_HTTP_VERSION_2_0 => '--http2',
+    ];
+
+    /**
+     * @var string current status of this hook, either enabled or disabled
+     */
+    protected static $curlOpts = [];
+
     public static function curl_setopt_array($ch, $options)
     {
         $chNumber = (int) $ch;
         self::$curlOpts[$chNumber] = self::$curlOpts[$chNumber] ?? [];
         self::$curlOpts[$chNumber] = $options + self::$curlOpts[$chNumber];
 
-        return \curl_setopt_array(...func_get_args());
+        return call_user_func_array(__FUNCTION__, func_get_args());
     }
 
     public static function curl_setopt($ch, $option, $value)
@@ -33,14 +38,11 @@ class CurlHook extends Hook
         self::$curlOpts[$chNumber] = self::$curlOpts[$chNumber] ?? [];
         self::$curlOpts[$chNumber][$option] = $value;
 
-        return \curl_setopt(...func_get_args());
+        return call_user_func_array(__FUNCTION__, func_get_args());
     }
 
-    public static function curl_exec($ch)
+    public static function curlOptionsToCommand($options)
     {
-        $options = self::$curlOpts[(int) $ch] ?? [];
-        self::$curlOpts[(int) $ch] = [];
-
         $result = [];
 
         $isPostFields = strpos($options[CURLOPT_POSTFIELDS] ?? '', '%2B')
@@ -72,15 +74,8 @@ class CurlHook extends Hook
             $result[] = " --connect-timeout  '" . round($options[CURLOPT_CONNECTTIMEOUT_MS] / 1000, 3) . "'";
         }
         if (isset($options[CURLOPT_HTTP_VERSION])) {
-            $versions = [
-                CURL_HTTP_VERSION_NONE => '',
-                CURL_HTTP_VERSION_1_0 => '--http1.0',
-                CURL_HTTP_VERSION_1_1 => '--http1.1',
-                CURL_HTTP_VERSION_2_0 => '--http2',
-            ];
-            $result[] = ' ' . $versions[$options[CURLOPT_HTTP_VERSION]] . ' \\';
+            $result[] = ' ' . (self::CURL_VERSIONS[$options[CURLOPT_HTTP_VERSION]] ?? '') . ' \\';
         }
-
         if (isset($options[CURLOPT_UPLOAD])) {
             $result[] = " --upload '" . $options[CURLOPT_UPLOAD] . "' ";
         }
@@ -89,7 +84,7 @@ class CurlHook extends Hook
 
         if (!empty($options[CURLOPT_INFILE]) && is_resource($options[CURLOPT_INFILE])) {
             fseek($options[CURLOPT_INFILE], 0);
-            $data = fread($options[CURLOPT_INFILE], 999999) ?: $data;
+            $data = fgets($options[CURLOPT_INFILE]) ?: $data;
             fseek($options[CURLOPT_INFILE], 0);
         }
 
@@ -102,11 +97,21 @@ class CurlHook extends Hook
             $result[] = " --data '$data'";
         }
 
+        return implode("\n", $result);
+    }
+
+    public static function curl_exec($ch)
+    {
+        $options = self::$curlOpts[(int) $ch] ?? [];
+        self::$curlOpts[(int) $ch] = [];
+
+        self::log(self::curlOptionsToCommand($options));
+
         if (!empty($options[CURLOPT_READFUNCTION])) {
             $func = $options[CURLOPT_READFUNCTION];
             curl_setopt($ch, CURLOPT_READFUNCTION, function ($ch, $fh, $length) use (&$func, &$data, &$result) {
                 $ret = $func($ch, $fh, $length);
-                $result[] = 'CURL> ' . $ret;
+                self::log('CURL> ' . $ret);
 
                 return $ret;
             });
@@ -117,7 +122,7 @@ class CurlHook extends Hook
 
         if ($isWriteFunction) {
             curl_setopt($ch, CURLOPT_WRITEFUNCTION, function (&$ch, &$str, &$result) use ($options) {
-                $result[] = $str;
+                self::log($str);
                 if (isset($options[CURLOPT_WRITEFUNCTION])) {
                     return $options[CURLOPT_WRITEFUNCTION]($ch, $str);
                 }
@@ -126,10 +131,16 @@ class CurlHook extends Hook
             });
         }
 
-        Logger::debug(implode("\n", $result));
+        $curlLog = fopen('php://memory', 'ab+');//
+        curl_setopt($ch, CURLOPT_STDERR, $curlLog);
         curl_setopt($ch, CURLOPT_VERBOSE, true);
 
-        $content = \curl_exec(...func_get_args());
+        $content = call_user_func_array(__FUNCTION__, func_get_args());
+
+        $log = fgets($curlLog);
+        if ($log){
+            self::log($log);
+        }
 
         $result = [];
         if (!$isWriteFunction) {
@@ -143,15 +154,8 @@ class CurlHook extends Hook
             }
         }
 
-        Logger::debug(implode("\n", $result));//
+        self::log(implode("\n", $result));
 
         return $content;
-    }
-
-    public static function curl_multi_exec($mh, &$still_running)
-    {
-        Logger::debug('curl_multi_exec');
-
-        return \curl_multi_exec(...func_get_args());
     }
 }
