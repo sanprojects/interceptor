@@ -17,8 +17,8 @@
   "minimum-stability": "stable",
   "require": {
     "php": ">=7.4",
-    "monolog/monolog": "^2.2",
-    "php-di/php-di": "^6.3",
+    "monolog/monolog": ">=1.0",
+    "php-di/php-di": ">=6.0",
     "ext-pdo": "*",
     "ext-curl": "*",
     "ext-json": "*",
