@@ -10,6 +10,7 @@ help() {
 }
 
 test() {
+    docker run --rm -ti -d --name=mysql -p3306:3306 -e MYSQL_ROOT_PASSWORD=toor yobasystems/alpine-mariadb
     ./vendor/bin/phpunit --bootstrap tests/bootstrap.php tests || exit
 }
 
@@ -21,4 +22,4 @@ update() {
     composer update
 }
 
-${1:-help} || help
+${1:-help} "${@:2}" || help

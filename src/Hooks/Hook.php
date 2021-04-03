@@ -29,18 +29,47 @@ class Hook
         Di::get(Logger::class)->debug($message, $data);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public static function hookFunction(callable $name, array $args)
+    public static function hookFunction($name, array $args)
     {
-        $result = call_user_func_array($name, $args);
-        self::log("$name()=" . $result, $args);
+        $funcName = self::getCallableName($name);
+        try {
+            $result = call_user_func_array($name, $args);
+        } catch (\Exception $e) {
+            self::log($funcName, ['args' => $args, 'result' => $e->getMessage()]);
+            throw $e;
+        }
+
+        self::log($funcName, ['args' => $args, 'result' => self::performResult($result)]);
 
         return $result;
     }
 
     public static function __callStatic($name, $args) {
         return self::hookFunction($name, $args);
+    }
+
+    public static function performResult($result) {
+        return var_export($result, true);
+    }
+
+    static function getCallableName($callable): string
+    {
+        if (is_string($callable)) {
+            return trim($callable);
+        }
+
+        if (is_array($callable)) {
+            if (is_object($callable[0])) {
+                return sprintf("%s::%s", get_class($callable[0]), trim($callable[1]));
+            }
+
+            return sprintf("%s::%s", trim($callable[0]), trim($callable[1]));
+        }
+
+        if ($callable instanceof Closure) {
+            return 'closure';
+        }
+
+        return 'unknown';
     }
 }
