@@ -22,7 +22,8 @@
     "ext-pdo": "*",
     "ext-curl": "*",
     "ext-json": "*",
-    "ext-redis": "*"
+    "ext-redis": "*",
+    "ext-amqp": "*"
   },
   "require-dev": {
     "phpunit/phpunit": ">=7",
