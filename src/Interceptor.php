@@ -2,6 +2,7 @@
 
 namespace Sanprojects\Interceptor;
 
+use Sanprojects\Interceptor\Hooks\AMQPHook;
 use Sanprojects\Interceptor\Hooks\CurlHook;
 use Sanprojects\Interceptor\Hooks\FileHook;
 use Sanprojects\Interceptor\Hooks\PDOHook;

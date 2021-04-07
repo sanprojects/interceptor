@@ -131,7 +131,7 @@ class CurlHook extends Hook
             });
         }
 
-        $curlLog = fopen('php://memory', 'ab+');//
+        $curlLog = fopen('php://memory', 'ab+');
         curl_setopt($ch, CURLOPT_STDERR, $curlLog);
         curl_setopt($ch, CURLOPT_VERBOSE, true);
 
@@ -146,8 +146,8 @@ class CurlHook extends Hook
         if (!$isWriteFunction) {
             if (!empty($options[CURLOPT_FILE]) && is_resource($options[CURLOPT_FILE])) {
                 $pos = ftell($options[CURLOPT_FILE]);
-                fseek($options[CURLOPT_FILE], 0); // silent crash app 502 Bad Gateway
-                $result = fread($options[CURLOPT_FILE], 999999);
+                fseek($options[CURLOPT_FILE], 0);
+                $result = fgets($options[CURLOPT_FILE]);
                 fseek($options[CURLOPT_FILE], $pos);
             } else {
                 $result = $content;
