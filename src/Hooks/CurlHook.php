@@ -122,7 +122,7 @@ class CurlHook extends Hook
 
         if ($isWriteFunction) {
             curl_setopt($ch, CURLOPT_WRITEFUNCTION, function (&$ch, &$str, &$result) use ($options) {
-                self::log($str);
+                self::log('CURL write>' . $str);
                 if (isset($options[CURLOPT_WRITEFUNCTION])) {
                     return $options[CURLOPT_WRITEFUNCTION]($ch, $str);
                 }
@@ -138,23 +138,23 @@ class CurlHook extends Hook
         $content = call_user_func_array(__FUNCTION__, func_get_args());
 
         $log = fgets($curlLog);
-        if ($log){
-            self::log($log);
+        if ($log) {
+            self::log('CURL> ' . $log);
         }
 
-        $result = [];
+        $result = '';
         if (!$isWriteFunction) {
             if (!empty($options[CURLOPT_FILE]) && is_resource($options[CURLOPT_FILE])) {
                 $pos = ftell($options[CURLOPT_FILE]);
                 fseek($options[CURLOPT_FILE], 0); // silent crash app 502 Bad Gateway
-                $result[] = fread($options[CURLOPT_FILE], 999999);
+                $result = fread($options[CURLOPT_FILE], 999999);
                 fseek($options[CURLOPT_FILE], $pos);
             } else {
-                $result[] = $content;
+                $result = $content;
             }
         }
 
-        self::log(implode("\n", $result));
+        self::log('CURL> ' . $result);
 
         return $content;
     }
