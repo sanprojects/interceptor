@@ -10,8 +10,8 @@ final class InterceptorTest extends TestCase
 {
     public const CONFIG = [
         'mysql' => [
-            'host' => '127.0.0.1',
-            'username' => 'root',
+            'host' => 'ensembldb.ensembl.org',
+            'username' => 'anonymous',
             'password' => '',
         ],
     ];
@@ -22,6 +22,43 @@ final class InterceptorTest extends TestCase
     {
         $this->testHandler = new TestHandler();
         Di::getDefault()->get(Logger::class)->setHandlers([$this->testHandler]);
+    }
+
+    public function testStdInOut(): void
+    {
+        self::assertSame(12, fwrite(STDOUT, 'testStdInOut'));
+        $logs = array_column($this->testHandler->getRecords(), 'formatted');
+        self::assertEmpty($logs);
+    }
+
+    public function testFileWrite(): void
+    {
+
+        $fileHandler = fopen(__DIR__ . '/test.txt', 'w+b');
+        self::assertNotEmpty($fileHandler);
+        self::assertSame(4, fwrite($fileHandler, 'test'));
+        fseek($fileHandler, 0);
+        self::assertSame('test', fread($fileHandler, 100));
+        fclose($fileHandler);
+        $logs = array_column($this->testHandler->getRecords(), 'formatted');
+        self::assertStringContainsString('fwrite', $logs[0]);
+        self::assertStringContainsString('test.txt', $logs[0]);
+        self::assertStringContainsString('fread', $logs[1]);
+    }
+
+    public function testFileGetContents(): void
+    {
+        self::assertSame('test', file_get_contents(__DIR__ . '/test.txt'));
+        self::assertTrue($this->testHandler->hasDebugThatContains('file_get_contents'));
+    }
+
+    public function testFilePutContents(): void
+    {
+        self::assertSame(4, file_put_contents(__DIR__ . '/test.txt', 'test'));
+        $logs = $this->testHandler->getRecords();
+        self::assertTrue($this->testHandler->hasDebugThatContains('file_put_contents'));
+        self::assertStringContainsString('test.txt', $logs[0]['formatted']);
+        self::assertStringContainsString('test', $logs[0]['formatted']);
     }
 
     public function testRedis(): void
@@ -74,20 +111,5 @@ final class InterceptorTest extends TestCase
 
         self::assertStringContainsString('html', $server_output);
         self::assertTrue($this->testHandler->hasDebugThatContains('curl -vX POST'));
-    }
-
-    public function testFileGetContents(): void
-    {
-        self::assertSame('test', file_get_contents(__DIR__ . '/test.txt'));
-        self::assertTrue($this->testHandler->hasDebugThatContains('file_get_contents'));
-    }
-
-    public function testFilePutContents(): void
-    {
-        self::assertSame(4, file_put_contents(__DIR__ . '/test.txt', 'test'));
-        $logs = $this->testHandler->getRecords();
-        self::assertTrue($this->testHandler->hasDebugThatContains('file_put_contents'));
-        self::assertStringContainsString('test.txt', $logs[0]['formatted']);
-        self::assertStringContainsString('test', $logs[0]['formatted']);
     }
 }

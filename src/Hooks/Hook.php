@@ -29,7 +29,7 @@ class Hook
         Di::get(Logger::class)->debug($message, $data);
     }
 
-    public static function hookFunction($name, array $args)
+    public static function hookFunction($name, array $args, array $extra = [])
     {
         $funcName = self::getCallableName($name);
         try {
@@ -39,7 +39,7 @@ class Hook
             throw $e;
         }
 
-        self::log($funcName, ['args' => $args, 'result' => self::performResult($result)]);
+        self::log($funcName, ['args' => $args, 'result' => self::performResult($result), 'extra' => $extra]);
 
         return $result;
     }
