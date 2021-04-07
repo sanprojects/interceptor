@@ -3,6 +3,7 @@
 namespace Sanprojects\Interceptor\Hooks;
 
 require_once('PDOWrapper.php'); // load before, to prevent injection into this file
+require_once('PDOStatement.php');
 
 class PDOHook extends Hook
 {

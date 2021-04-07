@@ -33,7 +33,6 @@ final class InterceptorTest extends TestCase
 
     public function testFileWrite(): void
     {
-
         $fileHandler = fopen(__DIR__ . '/test.txt', 'w+b');
         self::assertNotEmpty($fileHandler);
         self::assertSame(4, fwrite($fileHandler, 'test'));
@@ -95,8 +94,14 @@ final class InterceptorTest extends TestCase
         $stmt = $dbh->query('SELECT 123;');
         self::assertSame('123', $stmt->fetchColumn());
 
+        $stmt = $dbh->prepare('SELECT :test;');
+        $stmt->bindValue(':test', 123, PDO::PARAM_INT);
+        $stmt->execute();
+        self::assertSame('123', $stmt->fetchColumn());
+
         $logs = $this->testHandler->getRecords();
         self::assertStringContainsString('SELECT 123', $logs[0]['formatted']);
+        self::assertStringContainsString('SELECT 123', $logs[1]['formatted']);
     }
 
     public function testCurl(): void
