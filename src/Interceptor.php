@@ -2,7 +2,6 @@
 
 namespace Sanprojects\Interceptor;
 
-use Psr\Log\LoggerInterface;
 use Sanprojects\Interceptor\Hooks\CurlHook;
 use Sanprojects\Interceptor\Hooks\FileHook;
 use Sanprojects\Interceptor\Hooks\PDOHook;
@@ -53,8 +52,6 @@ class Interceptor extends \php_user_filter
      * @var callable[] transformers which have been appended to this stream processor
      */
     protected static array $hooks = [];
-
-    protected LoggerInterface $logger;
 
     public function __construct()
     {
@@ -634,14 +631,23 @@ class Interceptor extends \php_user_filter
      */
     public function filter($in, $out, &$consumed, $closing)
     {
-        while ($bucket = stream_bucket_make_writeable($in)) {
-            foreach (static::$hooks as $codeTransformer) {
-                $bucket->data = $codeTransformer($bucket->data);
-            }
+        $bufferHandle = fopen('php://temp', 'w+');
+        $outBucket = stream_bucket_new($bufferHandle, '');
 
-            $consumed += $bucket->datalen;
-            stream_bucket_append($out, $bucket);
+        if (false === $outBucket) {
+            return PSFS_ERR_FATAL;
         }
+
+        while ($bucket = stream_bucket_make_writeable($in)) {
+            $outBucket->data .= $bucket->data;
+            $consumed += $bucket->datalen;
+        }
+
+        foreach (static::$hooks as $codeTransformer) {
+            $outBucket->data = $codeTransformer($outBucket->data);
+        }
+
+        stream_bucket_append($out, $outBucket);
 
         return PSFS_PASS_ON;
     }
@@ -673,16 +679,5 @@ class Interceptor extends \php_user_filter
         $interceptor->intercept();
 
         return $interceptor;
-    }
-
-    /**
-     * Sets logger
-     *
-     * @param \Psr\Log\LoggerInterface $logger Logger
-     * @return void
-     */
-    public function setLogger(LoggerInterface $logger): void
-    {
-        $this->logger = $logger;
     }
 }
