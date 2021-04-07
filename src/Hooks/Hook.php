@@ -49,7 +49,12 @@ class Hook
     }
 
     public static function performResult($result) {
-        return var_export($result, true);
+        if (is_object($result)) {
+            return 'object';
+            return get_class($result);
+        }
+
+        return print_r($result, true);
     }
 
     static function getCallableName($callable): string
@@ -66,8 +71,8 @@ class Hook
             return sprintf("%s::%s", trim($callable[0]), trim($callable[1]));
         }
 
-        if ($callable instanceof Closure) {
-            return 'closure';
+        if (is_object($callable)) {
+            return get_class($callable);
         }
 
         return 'unknown';

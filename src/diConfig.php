@@ -3,7 +3,7 @@
 use DI\Container;
 use Monolog\Handler\ChromePHPHandler;
 use Monolog\Handler\ErrorLogHandler;
-use Monolog\Handler\StreamHandler as MonologStreamHandler;
+use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 
 return [
@@ -11,6 +11,7 @@ return [
         return new Logger('interceptor', [
             new ChromePHPHandler(),
             new ErrorLogHandler(),
+            new StreamHandler('php://stderr'),
         ]);
     },
 ];
