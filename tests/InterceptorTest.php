@@ -91,17 +91,16 @@ final class InterceptorTest extends TestCase
     {
         $config = self::CONFIG['mysql'];
         $dbh = new PDO('mysql:dbname=;host=' . $config['host'], $config['username'], $config['password']);
-        $stmt = $dbh->query('SELECT 123;');
-        self::assertSame('123', $stmt->fetchColumn());
+        self::assertSame('123', $dbh->query("SELECT 123")->fetchColumn());
 
         $stmt = $dbh->prepare('SELECT :test;');
         $stmt->bindValue(':test', 123, PDO::PARAM_INT);
         $stmt->execute();
         self::assertSame('123', $stmt->fetchColumn());
 
-        $logs = $this->testHandler->getRecords();
-        self::assertStringContainsString('SELECT 123', $logs[0]['formatted']);
-        self::assertStringContainsString('SELECT 123', $logs[1]['formatted']);
+        $logs = array_column($this->testHandler->getRecords(), 'formatted');
+        self::assertStringContainsString('SELECT 123', $logs[0]);
+        self::assertStringContainsString('SELECT 123', $logs[1]);
     }
 
     public function testCurl(): void

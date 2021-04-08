@@ -2,9 +2,8 @@
 
 namespace Sanprojects\Interceptor\Hooks;
 
-use AMQPConnection;
 
-class AMQPConnectionWrapper extends AMQPConnection
+class AMQPConnection extends \AMQPConnection
 {
     public function __construct($credentials = [])
     {

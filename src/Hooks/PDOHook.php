@@ -2,14 +2,15 @@
 
 namespace Sanprojects\Interceptor\Hooks;
 
-require_once('PDOWrapper.php'); // load before, to prevent injection into this file
+// load before, to prevent injection into this file
+require_once('PDO.php');
 require_once('PDOStatement.php');
 
 class PDOHook extends Hook
 {
     protected const PATTERNS = [
-        '@new\s+\\\?PDO\W*\(@' => 'new \\' . PDOWrapper::class . '(',
-        '@extends\s+\\\?PDO\b@' => 'extends \\' . PDOWrapper::class,
+        '@new\s+\\\?PDO\W*\(@' => 'new \\' . PDO::class . '(',
+        '@extends\s+\\\?PDO\b@' => 'extends \\' . PDO::class,
     ];
 
     protected const HOOKED_FUNCTIONS = [
