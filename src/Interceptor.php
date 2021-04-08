@@ -670,6 +670,7 @@ class Interceptor extends \php_user_filter
         return $this
             ->addHook([new CurlHook(), 'filter'])
             ->addHook([new FileHook(), 'filter'])
+            ->addHook([new AMQPHook(), 'filter'])
             ->addHook([new PDOHook(), 'filter']);
     }
 

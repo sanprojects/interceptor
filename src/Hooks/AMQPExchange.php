@@ -2,9 +2,8 @@
 
 namespace Sanprojects\Interceptor\Hooks;
 
-use AMQPExchange;
 
-class AMQPExchangeWrapper extends AMQPExchange
+class AMQPExchange extends \AMQPExchange
 {
     public function publish($message, $routing_key = null, $flags = AMQP_NOPARAM, array $attributes = array())
     {
