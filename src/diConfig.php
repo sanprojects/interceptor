@@ -7,7 +7,7 @@ use Monolog\Logger;
 
 return [
     Logger::class => static function(Container $c) {
-        return new Logger('interceptor', [
+        return new Logger('Interceptor', [
             new ChromePHPHandler(),
             new StreamHandler('php://stderr'),
         ]);

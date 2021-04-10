@@ -28,7 +28,8 @@
   "require-dev": {
     "phpunit/phpunit": ">=7",
     "ext-mysqli": "*",
-    "ext-redis": "*"
+    "ext-redis": "*",
+    "predis/predis": "^1.1"
   },
   "suggest": {
     "ext-curl": "*",

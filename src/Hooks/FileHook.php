@@ -19,7 +19,8 @@ class FileHook extends Hook
 
     public static function stream_socket_client($remote_socket, &$errno, &$errstr, $timeout = null, $flags = null, $context = null)
     {
-        $result = stream_socket_client($remote_socket, $errno, $errstr, $timeout, $flags);
+        $result = self::hookFunction(__FUNCTION__, [$remote_socket, &$errno, &$errstr, $timeout, $flags]);
+        //$result = stream_socket_client($remote_socket, $errno, $errstr, $timeout, $flags);
         self::$fileHandlers[(int) $result] = $remote_socket;
 
         return $result;
@@ -27,7 +28,8 @@ class FileHook extends Hook
 
     public static function fopen($filename, $options)
     {
-        $result = call_user_func_array(__FUNCTION__, func_get_args());
+        $result = self::hookFunction(__FUNCTION__, func_get_args());
+        //$result = call_user_func_array(__FUNCTION__, func_get_args());
         self::$fileHandlers[(int) $result] = $filename;
 
         return $result;
@@ -46,7 +48,9 @@ class FileHook extends Hook
             return call_user_func_array(__FUNCTION__, func_get_args());
         }
 
-        return self::hookFunction(__FUNCTION__, func_get_args(), ['filename' => $filename]);
+        $args = func_get_args();
+        $args[0] = $filename;
+        return self::hookFunction(__FUNCTION__, func_get_args(), $args);
     }
 
     public static function fread($handler)
@@ -58,7 +62,9 @@ class FileHook extends Hook
 
         $filename = self::$fileHandlers[(int) $handler] ?? '';
 
-        return self::hookFunction(__FUNCTION__, func_get_args(), ['filename' => $filename]);
+        $args = func_get_args();
+        $args[0] = $filename;
+        return self::hookFunction(__FUNCTION__, func_get_args(), $args);
     }
 
     public static function fgets($handler)
@@ -70,6 +76,8 @@ class FileHook extends Hook
 
         $filename = self::$fileHandlers[(int) $handler] ?? '';
 
-        return self::hookFunction(__FUNCTION__, func_get_args(), ['filename' => $filename]);
+        $args = func_get_args();
+        $args[0] = $filename;
+        return self::hookFunction(__FUNCTION__, func_get_args(), $args);
     }
 }

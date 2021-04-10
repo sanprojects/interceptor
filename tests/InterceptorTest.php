@@ -3,6 +3,7 @@
 use Monolog\Handler\TestHandler;
 use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
+use Predis\Client;
 use Sanprojects\Interceptor\Di;
 use function PHPUnit\Framework\assertSame;
 
@@ -22,6 +23,11 @@ final class InterceptorTest extends TestCase
     {
         $this->testHandler = new TestHandler();
         Di::getDefault()->get(Logger::class)->setHandlers([$this->testHandler]);
+    }
+
+    protected function getLogs(): array
+    {
+        return array_column($this->testHandler->getRecords(), 'formatted');
     }
 
     public function testStdInOut(): void
@@ -67,11 +73,22 @@ final class InterceptorTest extends TestCase
         }
 
         $redis = new Redis();
-        $redis->pconnect('127.0.0.1', 6379);
+        $redis->connect('127.0.0.1', 6379);
         $redis->set('test', '123');
+        self::assertSame('123', $redis->get('test'));
 
-        $logs = $this->testHandler->getRecords();
-        self::assertStringContainsString('123', $logs[0]['formatted']);
+        $logs = $this->getLogs();
+        self::assertStringContainsString('127.0.0.1', $logs[0]);
+        self::assertStringContainsString('123', $logs[1]);
+    }
+
+    public function testPredis(): void
+    {
+        $redis = new Client();
+        $redis->set('test', '123');
+        self::assertSame('123', $redis->get('test'));
+
+        $logs = $this->getLogs();print_r($logs);die;
     }
 
     public function testMysqli(): void
