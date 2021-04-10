@@ -8,14 +8,21 @@ use Sanprojects\Interceptor\Di;
 class Hook
 {
     protected const PATTERNS = [];
-
     protected const HOOKED_FUNCTIONS = [];
+    protected const HOOKED_CLASSES = [];
+
+    private static $disableHook = false;
 
     public function filter(string $code): string
     {
         $patterns = static::PATTERNS;
         foreach (static::HOOKED_FUNCTIONS as $func) {
             $patterns['/(?<!::|->|\w_)\\\?' . $func . '\s*\(/'] = '\\' . static::class . '::' . $func . '(';
+        }
+
+        foreach (static::HOOKED_CLASSES as $oldClass => $newClass) {
+            $patterns['@new\s+\\\?' . $oldClass . '\W*\(@'] = 'new \\' . $newClass . '(';
+            $patterns['@extends\s+\\\?' . $oldClass . '\b@'] = 'extends \\' . $newClass;
         }
 
         return preg_replace(array_keys($patterns), array_values($patterns), $code);
@@ -29,17 +36,28 @@ class Hook
         Di::get(Logger::class)->debug($message, $data);
     }
 
-    public static function hookFunction($name, array $args, array $extra = [])
+    public static function hookFunction($callble, array $args, array $extra = [], $name = '')
     {
-        $funcName = self::getCallableName($name);
+        // prevent hook inside another hook
+        if (self::$disableHook) {
+            return call_user_func_array($callble, $args);
+        }
+
+        self::$disableHook = true;
+        $funcName = $name ?: self::getCallableName($callble);
         try {
-            $result = call_user_func_array($name, $args);
+            $result = call_user_func_array($callble, $args);
         } catch (\Exception $e) {
-            self::log($funcName, ['args' => $args, 'result' => $e->getMessage()]);
+            $args = $extra ?: $args;
+            $args[] = $e->getMessage();
+            self::log($funcName, $args);
             throw $e;
         }
 
-        self::log($funcName, ['args' => $args, 'result' => self::performResult($result), 'extra' => $extra]);
+        $args = $extra ?: $args;
+        $args[] = self::performResult($result);
+        self::log($funcName, $args);
+        self::$disableHook = false;
 
         return $result;
     }

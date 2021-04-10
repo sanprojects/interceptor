@@ -6,6 +6,7 @@ use Sanprojects\Interceptor\Hooks\AMQPHook;
 use Sanprojects\Interceptor\Hooks\CurlHook;
 use Sanprojects\Interceptor\Hooks\FileHook;
 use Sanprojects\Interceptor\Hooks\PDOHook;
+use Sanprojects\Interceptor\Hooks\RedisHook;
 
 /**
  * Implementation adapted from:
@@ -671,6 +672,7 @@ class Interceptor extends \php_user_filter
             ->addHook([new CurlHook(), 'filter'])
             ->addHook([new FileHook(), 'filter'])
             ->addHook([new AMQPHook(), 'filter'])
+            ->addHook([new RedisHook(), 'filter'])
             ->addHook([new PDOHook(), 'filter']);
     }
 

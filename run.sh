@@ -11,6 +11,7 @@ help() {
 
 test() {
     docker run --rm -ti -d --name=mysql -p3306:3306 -e MYSQL_ROOT_PASSWORD=toor yobasystems/alpine-mariadb
+    docker run --rm -ti -d --name=redis -p6379:6379 redis
     ./vendor/bin/phpunit --bootstrap tests/bootstrap.php tests || exit
 }
 
