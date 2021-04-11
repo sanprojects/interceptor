@@ -74,7 +74,7 @@ class CurlHook extends Hook
             $result[] = " --connect-timeout  '" . round($options[CURLOPT_CONNECTTIMEOUT_MS] / 1000, 3) . "'";
         }
         if (isset($options[CURLOPT_HTTP_VERSION])) {
-            $result[] = ' ' . (self::CURL_VERSIONS[$options[CURLOPT_HTTP_VERSION]] ?? '') . ' \\';
+            $result[] = ' ' . (self::CURL_VERSIONS[$options[CURLOPT_HTTP_VERSION]] ?? '');
         }
         if (isset($options[CURLOPT_UPLOAD])) {
             $result[] = " --upload '" . $options[CURLOPT_UPLOAD] . "' ";
@@ -97,7 +97,7 @@ class CurlHook extends Hook
             $result[] = " --data '$data'";
         }
 
-        return implode("\n", $result);
+        return implode(" \\ \n", $result);
     }
 
     public static function curl_exec($ch)

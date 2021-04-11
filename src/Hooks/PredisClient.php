@@ -4,21 +4,26 @@ namespace Sanprojects\Interceptor\Hooks;
 
 class PredisClient extends \Predis\Client
 {
-    private string $connectionString;
+    private string $connectionHost;
 
     public function __construct($parameters = null, $options = null)
     {
-        $params = $parameters ?? 'tcp://127.0.0.1:6379';
-        $this->connectionString = is_string($params)
-            ? $params
-            : json_encode($params);
+        $this->connectionHost = $this->getHost($parameters);
 
         Hook::hookFunction(
             fn() => parent::__construct(...func_get_args()),
             func_get_args(),
-            [$this->connectionString],
+            [],
             'Redis::__construct'
         );
+    }
+
+    private function getHost($parameters)
+    {
+        $params = $parameters ?? 'tcp://127.0.0.1:6379';
+        $params = is_array($params) ? $params : parse_url($params);
+
+        return ($params['scheme'] ?? '') . '://' . ($params['host'] ?? '') . ':' . ($params['port'] ?? '');
     }
 
     public function __call($commandID, $arguments)
@@ -27,7 +32,7 @@ class PredisClient extends \Predis\Client
             fn() => parent::__call(...func_get_args()),
             func_get_args(),
             $arguments,
-            'Redis ' . $this->connectionString . ' ' .$commandID
+            'Redis ' . $this->connectionHost . ' ' .$commandID
         );
     }
 }
