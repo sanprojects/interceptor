@@ -1,8 +1,6 @@
 # Interceptor
 Intercepts external request in php scripts, and log it to `STDERR`. 
 So you can better understand what doing your program. 
-####Support: 
-curl, fwrite, fread, file_get_contents, file_put_contents, mysqli, Redis, PDO, AMQP.
 
 ## Installation
 ```shell script
@@ -35,8 +33,14 @@ Interceptor.DEBUG: PDOStatement::execute SELECT 123; true
 ```
 
 ## How it works
-It use `stream_wrapper_register` to intercept included php files 
+It use `stream_wrapper_register` to on the fly intercept included php files 
 and `stream_filter_register` for rewrite source code.
 
+##Support: 
+curl, fwrite, fread, file_get_contents, file_put_contents, mysqli, Redis, PDO, AMQP.
+
 ## Caveats
-It turns off opcache, so use it only for debug environment.
+- It turns off opcache.
+- Because of source code injection, it can crush your app. Not all cases tested.
+
+Use it only for debug environment.
