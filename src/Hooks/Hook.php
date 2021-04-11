@@ -10,7 +10,6 @@ class Hook
     protected const PATTERNS = [];
     protected const HOOKED_FUNCTIONS = [];
     protected const HOOKED_CLASSES = [];
-
     private static $disableHook = false;
 
     public function filter(string $code): string
@@ -21,11 +20,25 @@ class Hook
         }
 
         foreach (static::HOOKED_CLASSES as $oldClass => $newClass) {
-            $patterns['@new\s+\\\?' . $oldClass . '\W*\(@'] = 'new \\' . $newClass . '(';
-            $patterns['@extends\s+\\\?' . $oldClass . '\b@'] = 'extends \\' . $newClass;
+            $oldClassEscaped = preg_quote($oldClass, '/');
+            $patterns['@new\s+\\\?' . $oldClassEscaped . '\W*\(@'] = 'new \\' . $newClass . '(';
+            $patterns['@extends\s+\\\?' . $oldClassEscaped . '\b@'] = 'extends \\' . $newClass;
+
+            $shortName = $this->getClassShortName($oldClass);
+            if ($shortName && preg_match('@\buse\s+?' . $oldClassEscaped . '\b@', $code)) {
+                $patterns['@new\s+\\\?' . $shortName . '\W*\(@'] = 'new \\' . $newClass . '(';
+                $patterns['@extends\s+\\\?' . $shortName . '\b@'] = 'extends \\' . $newClass;
+            }
         }
 
         return preg_replace(array_keys($patterns), array_values($patterns), $code);
+    }
+
+    public function getClassShortName(string $classFullName): string
+    {
+        $classParts = explode('\\', $classFullName);
+
+        return $classParts > 1 ? end($classParts) : '';
     }
 
     /**

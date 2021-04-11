@@ -55,6 +55,8 @@ class Interceptor extends \php_user_filter
      */
     protected static array $hooks = [];
 
+    private string $code = '';
+
     public function __construct()
     {
     }
@@ -67,6 +69,7 @@ class Interceptor extends \php_user_filter
         if (!$this->isIntercepting) {
             ini_set('opcache.enable', '0');
             stream_wrapper_unregister(self::PROTOCOL);
+            $this->code = '';
             $this->isIntercepting = stream_wrapper_register(self::PROTOCOL, __CLASS__);
         }
     }
@@ -633,23 +636,25 @@ class Interceptor extends \php_user_filter
      */
     public function filter($in, $out, &$consumed, $closing)
     {
-        $bufferHandle = fopen('php://temp', 'w+');
-        $outBucket = stream_bucket_new($bufferHandle, '');
-
-        if (false === $outBucket) {
-            return PSFS_ERR_FATAL;
-        }
-
         while ($bucket = stream_bucket_make_writeable($in)) {
-            $outBucket->data .= $bucket->data;
+            $this->code .= $bucket->data;
             $consumed += $bucket->datalen;
         }
 
-        foreach (static::$hooks as $codeTransformer) {
-            $outBucket->data = $codeTransformer($outBucket->data);
+        if ($closing) {
+            foreach (static::$hooks as $codeTransformer) {
+                $this->code = $codeTransformer($this->code);
+            }
+
+            $bufferHandle = fopen('php://temp', 'w+');
+            $outBucket = stream_bucket_new($bufferHandle, $this->code);
+            if (false === $outBucket) {
+                return PSFS_ERR_FATAL;
+            }
+            stream_bucket_append($out, $outBucket);
+            $this->code = '';
         }
 
-        stream_bucket_append($out, $outBucket);
 
         return PSFS_PASS_ON;
     }

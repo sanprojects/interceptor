@@ -5,7 +5,7 @@ use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
 use Predis\Client;
 use Sanprojects\Interceptor\Di;
-use function PHPUnit\Framework\assertSame;
+use Sanprojects\Interceptor\LineFormatter;
 
 final class InterceptorTest extends TestCase
 {
@@ -21,8 +21,10 @@ final class InterceptorTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->testHandler = new TestHandler();
-        Di::getDefault()->get(Logger::class)->setHandlers([$this->testHandler]);
+        $this->testHandler = (new TestHandler())
+            ->setFormatter(new LineFormatter(null, null, true, true));
+        Di::getDefault()->get(Logger::class)
+            ->setHandlers([$this->testHandler]);
     }
 
     protected function getLogs(): array
@@ -74,7 +76,7 @@ final class InterceptorTest extends TestCase
 
         $redis = new Redis();
         $redis->connect('127.0.0.1', 6379);
-        $redis->set('test', '123');
+        $redis->set('test', '{"jsonKey":123}');
         self::assertSame('123', $redis->get('test'));
 
         $logs = $this->getLogs();
@@ -85,8 +87,11 @@ final class InterceptorTest extends TestCase
     public function testPredis(): void
     {
         $redis = new Client();
-        $redis->set('test', '123');
-        self::assertSame('123', $redis->get('test'));
+        $redis->set('test', '{"jsonKey":123}');
+        self::assertSame('{"jsonKey":123}', $redis->get('test'));
+
+        print_r(["test", '{"jsonKey":123}']);
+        //var_export(["test", '{"jsonKey":123}']);
 
         $logs = $this->getLogs();print_r($logs);die;
     }
