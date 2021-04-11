@@ -47,10 +47,11 @@ final class InterceptorTest extends TestCase
         fseek($fileHandler, 0);
         self::assertSame('test', fread($fileHandler, 100));
         fclose($fileHandler);
-        $logs = array_column($this->testHandler->getRecords(), 'formatted');
-        self::assertStringContainsString('fwrite', $logs[0]);
-        self::assertStringContainsString('test.txt', $logs[0]);
-        self::assertStringContainsString('fread', $logs[1]);
+        $logs = $this->getLogs();
+        self::assertStringContainsString('fopen', $logs[0]);
+        self::assertStringContainsString('fwrite', $logs[1]);
+        self::assertStringContainsString('test.txt', $logs[1]);
+        self::assertStringContainsString('fread', $logs[2]);
     }
 
     public function testFileGetContents(): void
@@ -77,7 +78,7 @@ final class InterceptorTest extends TestCase
         $redis = new Redis();
         $redis->connect('127.0.0.1', 6379);
         $redis->set('test', '{"jsonKey":123}');
-        self::assertSame('123', $redis->get('test'));
+        self::assertSame('{"jsonKey":123}', $redis->get('test'));
 
         $logs = $this->getLogs();
         self::assertStringContainsString('127.0.0.1', $logs[0]);
@@ -90,10 +91,10 @@ final class InterceptorTest extends TestCase
         $redis->set('test', '{"jsonKey":123}');
         self::assertSame('{"jsonKey":123}', $redis->get('test'));
 
-        print_r(["test", '{"jsonKey":123}']);
-        //var_export(["test", '{"jsonKey":123}']);
-
-        $logs = $this->getLogs();print_r($logs);die;
+        $logs = $this->getLogs();
+        self::assertStringContainsString('Redis::__construct tcp://127.0.0.1:6379', $logs[0]);
+        self::assertStringContainsString('Redis tcp://127.0.0.1:6379 set test {"jsonKey":123}', $logs[1]);
+        self::assertStringContainsString('Redis tcp://127.0.0.1:6379 get test {"jsonKey":123}', $logs[2]);
     }
 
     public function testMysqli(): void
