@@ -41,7 +41,12 @@ class PDOStatement extends \PDOStatement
     {
         $this->params = array_merge($params ?? [], $this->params);
 
-        return PDOHook::hookFunction(fn() => parent::execute(...func_get_args()), func_get_args(), [$this->fullQuery()]);
+        return PDOHook::hookFunction(
+            fn() => parent::execute(...func_get_args()),
+            func_get_args(),
+            [$this->fullQuery()],
+            'PDOStatement::execute'
+        );
     }
 
     public function fullQuery(): string

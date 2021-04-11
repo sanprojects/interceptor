@@ -12,6 +12,6 @@ class PDO extends \PDO
 
     public function query($statement, $mode = \PDO::ATTR_DEFAULT_FETCH_MODE, $arg3 = null, array $ctorargs = array())
     {
-        return PDOHook::hookFunction(fn() => parent::query(...func_get_args()), func_get_args());
+        return PDOHook::hookFunction(fn() => parent::query(...func_get_args()), func_get_args(), [], 'PDO::query');
     }
 }

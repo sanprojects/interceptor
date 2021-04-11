@@ -7,7 +7,7 @@ use Sanprojects\Interceptor\Interceptor;
 
 require __DIR__ . '/../vendor/autoload.php';
 
-// clear logger handlers to
+// clear logger handlers
 Di::get(Logger::class)->setHandlers([]);
 
 // intercept newly included files
