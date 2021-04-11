@@ -21,17 +21,31 @@ class Hook
 
         foreach (static::HOOKED_CLASSES as $oldClass => $newClass) {
             $oldClassEscaped = preg_quote($oldClass, '/');
+            $oldClassUse = $this->getClassUse($code, $oldClass);
+
+            if ($oldClassUse && $oldClassUse !== $oldClass) {
+                // don't replace "new Redis" if found "use Namespace/Redis;"
+                continue;
+            }
+
             $patterns['@new\s+\\\?' . $oldClassEscaped . '\W*\(@'] = 'new \\' . $newClass . '(';
             $patterns['@extends\s+\\\?' . $oldClassEscaped . '\b@'] = 'extends \\' . $newClass;
 
             $shortName = $this->getClassShortName($oldClass);
-            if ($shortName && preg_match('@\buse\s+?' . $oldClassEscaped . '\b@', $code)) {
+            if ($shortName && $oldClassUse) {
                 $patterns['@new\s+\\\?' . $shortName . '\W*\(@'] = 'new \\' . $newClass . '(';
                 $patterns['@extends\s+\\\?' . $shortName . '\b@'] = 'extends \\' . $newClass;
             }
         }
 
         return preg_replace(array_keys($patterns), array_values($patterns), $code);
+    }
+
+    public function getClassUse(string $code, string $class): string
+    {
+        return preg_match('@\buse\s+?([\w\\\]*?' . preg_quote($class, '/') . ')\b@', $code, $matches)
+            ? $matches[1]
+            : '';
     }
 
     public function getClassShortName(string $classFullName): string
@@ -81,11 +95,10 @@ class Hook
 
     public static function performResult($result) {
         if (is_object($result)) {
-            return 'object';
-            return get_class($result);
+            return @get_class($result) ?? 'object';
         }
 
-        return print_r($result, true);
+        return $result;
     }
 
     static function getCallableName($callable): string

@@ -9,14 +9,6 @@ use Sanprojects\Interceptor\LineFormatter;
 
 final class InterceptorTest extends TestCase
 {
-    public const CONFIG = [
-        'mysql' => [
-            'host' => 'ensembldb.ensembl.org',
-            'username' => 'anonymous',
-            'password' => '',
-        ],
-    ];
-
     private TestHandler $testHandler;
 
     protected function setUp(): void
@@ -92,14 +84,14 @@ final class InterceptorTest extends TestCase
         self::assertSame('{"jsonKey":123}', $redis->get('test'));
 
         $logs = $this->getLogs();
-        self::assertStringContainsString('Redis::__construct tcp://127.0.0.1:6379', $logs[0]);
+        self::assertStringContainsString('Redis::__construct', $logs[0]);
         self::assertStringContainsString('Redis tcp://127.0.0.1:6379 set test {"jsonKey":123}', $logs[1]);
         self::assertStringContainsString('Redis tcp://127.0.0.1:6379 get test {"jsonKey":123}', $logs[2]);
     }
 
     public function testMysqli(): void
     {
-        $config = self::CONFIG['mysql'];
+        $config = Di::get('config')['mysql'];
         $mysqli = mysqli_connect($config['host'], $config['username'], $config['password']);
         $query = mysqli_query($mysqli, 'SELECT 123');
         $return = mysqli_fetch_array($query);
@@ -112,7 +104,7 @@ final class InterceptorTest extends TestCase
 
     public function testPDO(): void
     {
-        $config = self::CONFIG['mysql'];
+        $config = Di::get('config')['mysql'];
         $dbh = new PDO('mysql:dbname=;host=' . $config['host'], $config['username'], $config['password']);
         self::assertSame('123', $dbh->query("SELECT 123")->fetchColumn());
 

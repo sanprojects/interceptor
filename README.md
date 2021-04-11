@@ -8,5 +8,7 @@ composer require sanprojects/interceptor:dev-main
 ## Basic Usage:
 ```php
 // intercept newly included files
-Interceptor::interceptAll();
+if (($_REQUEST['interceptor'] ?? '') || in_array('interceptor', $_SERVER['argv'] ?? [])) {
+    Interceptor::interceptAll();
+}
 ```

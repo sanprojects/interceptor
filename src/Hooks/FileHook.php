@@ -15,12 +15,12 @@ class FileHook extends Hook
         'file_put_contents',
     ];
 
+    protected const EXCLUDED_FILENAMES = ['php://stderr', 'php://temp', 'php://input'];
     protected static $fileHandlers = [];
 
     public static function stream_socket_client($remote_socket, &$errno, &$errstr, $timeout = null, $flags = null, $context = null)
     {
         $result = self::hookFunction(__FUNCTION__, [$remote_socket, &$errno, &$errstr, $timeout, $flags]);
-        //$result = stream_socket_client($remote_socket, $errno, $errstr, $timeout, $flags);
         self::$fileHandlers[(int) $result] = $remote_socket;
 
         return $result;
@@ -28,8 +28,12 @@ class FileHook extends Hook
 
     public static function fopen($filename, $options)
     {
-        $result = self::hookFunction(__FUNCTION__, func_get_args());
-        //$result = call_user_func_array(__FUNCTION__, func_get_args());
+        if (self::isExcluded(null, $filename)) {
+            $result = call_user_func_array(__FUNCTION__, func_get_args());
+        } else {
+            $result = self::hookFunction(__FUNCTION__, func_get_args());
+        }
+
         self::$fileHandlers[(int) $result] = $filename;
 
         return $result;
@@ -37,17 +41,11 @@ class FileHook extends Hook
 
     public static function fwrite($handler)
     {
-        // skip std in/out
-        if (in_array($handler, [STDOUT, STDERR])) {
+        if (self::isExcluded($handler)) {
             return call_user_func_array(__FUNCTION__, func_get_args());
         }
 
         $filename = self::$fileHandlers[(int) $handler] ?? '';
-
-        if (in_array($filename, ['php://stderr'])) {
-            return call_user_func_array(__FUNCTION__, func_get_args());
-        }
-
         $args = func_get_args();
         $args[0] = $filename;
         return self::hookFunction(__FUNCTION__, func_get_args(), $args);
@@ -55,8 +53,19 @@ class FileHook extends Hook
 
     public static function fread($handler)
     {
-        // skip std in/out
-        if ($handler === STDIN) {
+        if (self::isExcluded($handler)) {
+            return call_user_func_array(__FUNCTION__, func_get_args());
+        }
+
+        $filename = self::$fileHandlers[(int) $handler] ?? '';
+        $args = func_get_args();
+        $args[0] = $filename;
+        return self::hookFunction(__FUNCTION__, func_get_args(), $args);
+    }
+
+    public static function fgets($handler)
+    {
+        if (self::isExcluded($handler)) {
             return call_user_func_array(__FUNCTION__, func_get_args());
         }
 
@@ -67,17 +76,14 @@ class FileHook extends Hook
         return self::hookFunction(__FUNCTION__, func_get_args(), $args);
     }
 
-    public static function fgets($handler)
+    private static function isExcluded($handler, $fileName = '')
     {
-        // skip std in/out
-        if ($handler === STDIN) {
-            return call_user_func_array(__FUNCTION__, func_get_args());
+        $filename = $fileName ?: (self::$fileHandlers[(int) $handler] ?? '');
+
+        if (in_array($filename, self::EXCLUDED_FILENAMES)) {
+            return true;
         }
 
-        $filename = self::$fileHandlers[(int) $handler] ?? '';
-
-        $args = func_get_args();
-        $args[0] = $filename;
-        return self::hookFunction(__FUNCTION__, func_get_args(), $args);
+        return false;
     }
 }

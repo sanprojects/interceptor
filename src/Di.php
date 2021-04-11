@@ -4,6 +4,7 @@ namespace Sanprojects\Interceptor;
 
 use DI\Container;
 use DI\ContainerBuilder;
+use DI\Definition\Helper\DefinitionHelper;
 
 class Di
 {
@@ -12,6 +13,17 @@ class Di
     public static function get($name)
     {
         return self::getDefault()->get($name);
+    }
+
+    /**
+     * Define an object or a value in the container.
+     *
+     * @param string $name Entry name
+     * @param mixed|DefinitionHelper $value Value, use definition helpers to define objects
+     */
+    public static function set($name, $value)
+    {
+        return self::getDefault()->set($name, $value);
     }
 
     public static function getDefault(): Container
