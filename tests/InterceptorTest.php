@@ -27,8 +27,7 @@ final class InterceptorTest extends TestCase
     public function testStdInOut(): void
     {
         self::assertSame(12, fwrite(STDOUT, 'testStdInOut'));
-        $logs = array_column($this->testHandler->getRecords(), 'formatted');
-        self::assertEmpty($logs);
+        self::assertEmpty($this->getLogs());
     }
 
     public function testFileWrite(): void
@@ -55,10 +54,10 @@ final class InterceptorTest extends TestCase
     public function testFilePutContents(): void
     {
         self::assertSame(4, file_put_contents(__DIR__ . '/test.txt', 'test'));
-        $logs = $this->testHandler->getRecords();
+        $logs = $this->getLogs();
         self::assertTrue($this->testHandler->hasDebugThatContains('file_put_contents'));
-        self::assertStringContainsString('test.txt', $logs[0]['formatted']);
-        self::assertStringContainsString('test', $logs[0]['formatted']);
+        self::assertStringContainsString('test.txt', $logs[0]);
+        self::assertStringContainsString('test', $logs[0]);
     }
 
     public function testRedis(): void
@@ -97,9 +96,9 @@ final class InterceptorTest extends TestCase
         $return = mysqli_fetch_array($query);
         self::assertSame('123', $return[0]);
 
-        $logs = $this->testHandler->getRecords();
-        self::assertStringContainsString('mysqli_connect', $logs[0]['formatted']);
-        self::assertStringContainsString('SELECT 123', $logs[1]['formatted']);
+        $logs = $this->getLogs();
+        self::assertStringContainsString('mysqli_connect', $logs[0]);
+        self::assertStringContainsString('SELECT 123', $logs[1]);
     }
 
     public function testPDO(): void
@@ -113,9 +112,10 @@ final class InterceptorTest extends TestCase
         $stmt->execute();
         self::assertSame('123', $stmt->fetchColumn());
 
-        $logs = array_column($this->testHandler->getRecords(), 'formatted');
-        self::assertStringContainsString('SELECT 123', $logs[0]);
+        $logs = $this->getLogs();
+        self::assertStringContainsString('PDO::__construct', $logs[0]);
         self::assertStringContainsString('SELECT 123', $logs[1]);
+        self::assertStringContainsString('SELECT 123', $logs[2]);
     }
 
     public function testCurl(): void
@@ -128,7 +128,8 @@ final class InterceptorTest extends TestCase
         $server_output = curl_exec($ch);
         curl_close ($ch);
 
+        $logs = $this->getLogs();
         self::assertStringContainsString('html', $server_output);
-        self::assertTrue($this->testHandler->hasDebugThatContains('curl -vX POST'));
+        self::assertStringContainsString('curl -vX POST', $logs[0]);
     }
 }
