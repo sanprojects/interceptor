@@ -1,7 +1,7 @@
 # Interceptor
 Intercepts external request in php scripts, and log it to `STDERR`. 
 So you can better understand what doing your program. 
-#####Support: 
+####Support: 
 curl, fwrite, fread, file_get_contents, file_put_contents, mysqli, Redis, PDO, AMQP.
 
 ## Installation
