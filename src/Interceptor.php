@@ -5,6 +5,7 @@ namespace Sanprojects\Interceptor;
 use Sanprojects\Interceptor\Hooks\AMQPHook;
 use Sanprojects\Interceptor\Hooks\CurlHook;
 use Sanprojects\Interceptor\Hooks\FileHook;
+use Sanprojects\Interceptor\Hooks\MysqliHook;
 use Sanprojects\Interceptor\Hooks\PDOHook;
 use Sanprojects\Interceptor\Hooks\RedisHook;
 
@@ -678,6 +679,7 @@ class Interceptor extends \php_user_filter
             ->addHook([new FileHook(), 'filter'])
             ->addHook([new AMQPHook(), 'filter'])
             ->addHook([new RedisHook(), 'filter'])
+            ->addHook([new MysqliHook(), 'filter'])
             ->addHook([new PDOHook(), 'filter']);
     }
 

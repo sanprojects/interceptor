@@ -24,7 +24,8 @@
     "ext-json": "*",
     "ext-redis": "*",
     "ext-amqp": "*",
-    "ext-mbstring": "*"
+    "ext-mbstring": "*",
+    "ext-mysqli": "*"
   },
   "require-dev": {
     "phpunit/phpunit": ">=7",
