@@ -2,10 +2,6 @@
 
 namespace Sanprojects\Interceptor\Hooks;
 
-// load before, to prevent injection into this file
-require_once('PDO.php');
-require_once('PDOStatement.php');
-
 class PDOHook extends Hook
 {
     protected const HOOKED_CLASSES = [
