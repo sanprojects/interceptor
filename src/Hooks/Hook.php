@@ -94,10 +94,6 @@ class Hook
     }
 
     public static function performResult($result) {
-        if (is_object($result)) {
-            return @get_class($result) ?? 'object';
-        }
-
         return $result;
     }
 
