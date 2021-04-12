@@ -656,7 +656,6 @@ class Interceptor extends \php_user_filter
             $this->code = '';
         }
 
-
         return PSFS_PASS_ON;
     }
 
@@ -672,22 +671,17 @@ class Interceptor extends \php_user_filter
         return $this;
     }
 
-    public function addAllHooks(): self
+    public static function interceptAll(): self
     {
-        return $this
+        $interceptor = new Interceptor();
+        $interceptor
             ->addHook([new CurlHook(), 'filter'])
             ->addHook([new FileHook(), 'filter'])
             ->addHook([new AMQPHook(), 'filter'])
             ->addHook([new RedisHook(), 'filter'])
             ->addHook([new MysqliHook(), 'filter'])
-            ->addHook([new PDOHook(), 'filter']);
-    }
-
-    public static function interceptAll(): self
-    {
-        $interceptor = new Interceptor();
-        $interceptor->addAllHooks();
-        $interceptor->intercept();
+            ->addHook([new PDOHook(), 'filter'])
+            ->intercept();
 
         return $interceptor;
     }

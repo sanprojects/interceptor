@@ -14,6 +14,11 @@ class Hook
 
     public function filter(string $code): string
     {
+        // don't intercept hooks
+        if ($this->getNamespace($code) === __NAMESPACE__) {
+            return $code;
+        }
+
         $patterns = static::PATTERNS;
         foreach (static::HOOKED_FUNCTIONS as $func) {
             $patterns['/(?<!::|->|\w_)\\\?' . $func . '\s*\(/'] = '\\' . static::class . '::' . $func . '(';
@@ -43,7 +48,14 @@ class Hook
 
     public function getClassUse(string $code, string $class): string
     {
-        return preg_match('@\buse\s+?([\w\\\]*?' . preg_quote($class, '/') . ')\b@', $code, $matches)
+        return preg_match('@\buse\s+?([\w\\\\]*?' . preg_quote($class, '/') . ')\b@', $code, $matches)
+            ? $matches[1]
+            : '';
+    }
+
+    public function getNamespace(string $code): string
+    {
+        return preg_match('@\bnamespace\s+?([\w\\\\]+?);@', $code, $matches)
             ? $matches[1]
             : '';
     }
