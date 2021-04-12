@@ -104,57 +104,15 @@ class CurlHook extends Hook
     {
         $options = self::$curlOpts[(int) $ch] ?? [];
         self::$curlOpts[(int) $ch] = [];
-
         self::log(self::curlOptionsToCommand($options));
 
-        if (!empty($options[CURLOPT_READFUNCTION])) {
-            $func = $options[CURLOPT_READFUNCTION];
-            curl_setopt($ch, CURLOPT_READFUNCTION, function ($ch, $fh, $length) use (&$func, &$data, &$result) {
-                $ret = $func($ch, $fh, $length);
-                self::log('CURL> ' . $ret);
-
-                return $ret;
-            });
-        }
-
-        $isWriteFunction = !isset($options[CURLE_ABORTED_BY_CALLBACK])
-            && isset($options[CURLOPT_WRITEFUNCTION]);
-
-        if ($isWriteFunction) {
-            curl_setopt($ch, CURLOPT_WRITEFUNCTION, function (&$ch, &$str, &$result) use ($options) {
-                self::log('CURL write>' . $str);
-                if (isset($options[CURLOPT_WRITEFUNCTION])) {
-                    return $options[CURLOPT_WRITEFUNCTION]($ch, $str);
-                }
-
-                return strlen($str);
-            });
-        }
-
-        $curlLog = fopen('php://memory', 'ab+');
-        curl_setopt($ch, CURLOPT_STDERR, $curlLog);
+        $logFile = fopen('php://memory', 'w+');
+        curl_setopt($ch, CURLOPT_STDERR, $logFile);
         curl_setopt($ch, CURLOPT_VERBOSE, true);
 
         $content = call_user_func_array(__FUNCTION__, func_get_args());
-
-        $log = fgets($curlLog);
-        if ($log) {
-            self::log('CURL> ' . $log);
-        }
-
-        $result = '';
-        if (!$isWriteFunction) {
-            if (!empty($options[CURLOPT_FILE]) && is_resource($options[CURLOPT_FILE])) {
-                $pos = ftell($options[CURLOPT_FILE]);
-                fseek($options[CURLOPT_FILE], 0);
-                $result = fgets($options[CURLOPT_FILE]);
-                fseek($options[CURLOPT_FILE], $pos);
-            } else {
-                $result = $content;
-            }
-        }
-
-        self::log('CURL> ' . $result);
+        fseek($logFile, 0);
+        self::log('CURL> ' . stream_get_contents($logFile));
 
         return $content;
     }
