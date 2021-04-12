@@ -33,10 +33,10 @@ Interceptor.DEBUG: PDOStatement::execute SELECT 123; true
 ```
 
 ## How it works
-It use `stream_wrapper_register` to on the fly intercept included php files 
+It use `stream_wrapper_register` to intercept included php files 
 and `stream_filter_register` for rewrite source code.
 
-##Support: 
+## Support: 
 curl, fwrite, fread, file_get_contents, file_put_contents, mysqli, Redis, PDO, AMQP.
 
 ## Caveats
