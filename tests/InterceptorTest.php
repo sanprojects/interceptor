@@ -105,7 +105,6 @@ final class InterceptorTest extends TestCase
     {
         $config = Di::get('config')['mysql'];
         $dbh = new PDO('mysql:dbname=;host=' . $config['host'], $config['username'], $config['password']);
-        self::assertSame('123', $dbh->query("SELECT 123")->fetchColumn());
 
         $stmt = $dbh->prepare('SELECT :test;');
         $stmt->bindValue(':test', 123, PDO::PARAM_INT);
@@ -115,7 +114,6 @@ final class InterceptorTest extends TestCase
         $logs = $this->getLogs();
         self::assertStringContainsString('PDO::__construct', $logs[0]);
         self::assertStringContainsString('SELECT 123', $logs[1]);
-        self::assertStringContainsString('SELECT 123', $logs[2]);
     }
 
     public function testCurl(): void

@@ -15,9 +15,4 @@ class PDO extends \PDO
 
         $this->setAttribute(\PDO::ATTR_STATEMENT_CLASS, [PDOStatement::class]);
     }
-
-    public function query(...$args)
-    {
-        return PDOHook::hookFunction(fn() => parent::query(...func_get_args()), func_get_args(), [], 'PDO::query');
-    }
 }
