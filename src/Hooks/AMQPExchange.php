@@ -7,6 +7,11 @@ class AMQPExchange extends \AMQPExchange
 {
     public function publish($message, $routing_key = null, $flags = AMQP_NOPARAM, array $attributes = array())
     {
-        return AMQPHook::hookFunction([$this, 'parent::' . __FUNCTION__], func_get_args());
+        return Hook::hookFunction(
+            fn() => parent::publish(...func_get_args()),
+            func_get_args(),
+            [],
+            'AMQPConnection::publish'
+        );
     }
 }
