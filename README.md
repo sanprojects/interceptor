@@ -4,7 +4,7 @@ So you can better understand what doing your program.
 
 ## Installation
 ```shell script
-composer require sanprojects/interceptor:dev-main
+composer require sanprojects/interceptor
 ```
 ## Basic Usage:
 ```php
