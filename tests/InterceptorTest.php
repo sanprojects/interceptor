@@ -14,8 +14,6 @@ final class InterceptorTest extends TestCase
     protected function setUp(): void
     {
         $this->logsHandler = new ArrayHandler();
-        $this->logsHandler
-            ->setFormatter(new LineFormatter(null, null, true, true));
         Di::getDefault()
             ->get(Logger::class)
             ->setHandlers([$this->logsHandler]);
