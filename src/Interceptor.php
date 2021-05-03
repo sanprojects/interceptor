@@ -671,16 +671,22 @@ class Interceptor extends \php_user_filter
         return $this;
     }
 
-    public static function interceptAll(): self
+    public function addAllHooks(): self
     {
-        $interceptor = new Interceptor();
-        $interceptor
+        return $this
             ->addHook([new CurlHook(), 'filter'])
             ->addHook([new FileHook(), 'filter'])
             ->addHook([new AMQPHook(), 'filter'])
             ->addHook([new RedisHook(), 'filter'])
             ->addHook([new MysqliHook(), 'filter'])
-            ->addHook([new PDOHook(), 'filter'])
+            ->addHook([new PDOHook(), 'filter']);
+    }
+
+    public static function interceptAll(): self
+    {
+        $interceptor = new Interceptor();
+        $interceptor
+            ->addAllHooks()
             ->intercept();
 
         return $interceptor;
