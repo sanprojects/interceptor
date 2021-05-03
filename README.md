@@ -9,8 +9,8 @@ composer require sanprojects/interceptor
 ## Basic Usage:
 ```php
 // intercept newly included files
-if (($_REQUEST['interceptor'] ?? '') || in_array('interceptor', $_SERVER['argv'] ?? [])) {
-    Interceptor::interceptAll();
+if (($_REQUEST['interceptor'] ?? '') || in_array('--interceptor', $_SERVER['argv'] ?? [])) {
+    \Sanprojects\Interceptor\Interceptor::interceptAll();
 }
 ```
 Now in the console you'll see something like this:
