@@ -1,10 +1,18 @@
 <?php declare(strict_types=1);
 
-namespace Sanprojects\Interceptor;
+namespace Sanprojects\Interceptor\Logger;
 
 class LineFormatter extends \Monolog\Formatter\LineFormatter
 {
-    private int $maxLineLength = 500;
+    private int $maxLineLength = 100000;
+
+    /**
+     * @param int $maxLineLength
+     */
+    public function setMaxLineLength(int $maxLineLength): void
+    {
+        $this->maxLineLength = $maxLineLength;
+    }
 
     protected function convertToString($data): string
     {
