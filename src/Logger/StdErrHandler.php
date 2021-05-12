@@ -16,6 +16,6 @@ class StdErrHandler extends StreamHandler
     public function __construct()
     {
         parent::__construct('php://stderr');
-        $this->setFormatter(new LineFormatter(null, null, true,  true));
+        $this->setFormatter(new LineFormatter(null, "Y-m-d\TH:i:s.uP", true,  true));
     }
 }

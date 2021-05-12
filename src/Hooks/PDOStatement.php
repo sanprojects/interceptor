@@ -21,6 +21,7 @@ namespace Sanprojects\Interceptor\Hooks;
 
 class PDOStatement extends \PDOStatement
 {
+    public PDO $pdo;
     protected array $params = [];
 
     public function bindValue($param, $value, $type = \PDO::PARAM_STR)
@@ -45,8 +46,63 @@ class PDOStatement extends \PDOStatement
             fn() => parent::execute(...func_get_args()),
             func_get_args(),
             [$this->fullQuery()],
-            'PDOStatement::execute'
+            'PDOStatement::execute ' . $this->getServerName()
         );
+    }
+
+    public function fetchColumn($column = 0)
+    {
+        return PDOHook::hookFunction(
+            fn() => parent::fetchColumn(...func_get_args()),
+            func_get_args(),
+            [],
+            'PDOStatement::fetchColumn ' . $this->getServerName() . ' ' . $this->fullQuery()
+        );
+    }
+
+    public function fetch($mode = PDO::FETCH_BOTH, $cursorOrientation = PDO::FETCH_ORI_NEXT, $cursorOffset = 0)
+    {
+        return PDOHook::hookFunction(
+            fn() => parent::fetch(...func_get_args()),
+            func_get_args(),
+            [],
+            'PDOStatement::fetch ' . $this->getServerName() . ' ' . $this->fullQuery()
+        );
+    }
+
+    public function rowCount ()
+    {
+        return PDOHook::hookFunction(
+            fn() => parent::fetch(...func_get_args()),
+            func_get_args(),
+            [],
+            'PDOStatement::fetch ' . $this->getServerName() . ' ' . $this->fullQuery()
+        );
+    }
+
+    public function fetchAll ($how = NULL, $class_name = NULL, $ctor_args = NULL)
+    {
+        return PDOHook::hookFunction(
+            fn() => parent::fetchAll(...func_get_args()),
+            func_get_args(),
+            [],
+            'PDOStatement::fetch ' . $this->getServerName() . ' ' . $this->fullQuery()
+        );
+    }
+
+    public function fetchObject ($class_name = NULL, $ctor_args = NULL)
+    {
+        return PDOHook::hookFunction(
+            fn() => parent::fetchObject(...func_get_args()),
+            func_get_args(),
+            [],
+            'PDOStatement::fetch ' . $this->getServerName() . ' ' . $this->fullQuery()
+        );
+    }
+
+    public function getServerName(): string
+    {
+        return $this->pdo->serverName ?? '';
     }
 
     public function fullQuery(): string
