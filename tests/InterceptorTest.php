@@ -1,11 +1,10 @@
 <?php declare(strict_types=1);
 
 use Monolog\Handler\TestHandler;
-use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
 use Predis\Client;
 use Sanprojects\Interceptor\Di;
-use Sanprojects\Interceptor\Logger\LineFormatter;
+use Sanprojects\Interceptor\Logger\ArrayHandler;
 
 final class InterceptorTest extends TestCase
 {
@@ -13,16 +12,13 @@ final class InterceptorTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->logsHandler = new TestHandler();
-        $this->logsHandler->setFormatter(new LineFormatter(null, null, true, true));
-        Di::getDefault()
-            ->get(Logger::class)
-            ->setHandlers([$this->logsHandler]);
+        $this->logsHandler = Di::getDefault()->get(ArrayHandler::class);
+        $this->logsHandler->clear();
     }
 
     protected function getLogs(): array
     {
-        return array_column($this->logsHandler->getRecords(), 'formatted');
+        return $this->logsHandler->getFormattedLogs();
     }
 
     public function testStdInOut(): void

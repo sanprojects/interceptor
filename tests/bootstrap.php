@@ -1,6 +1,5 @@
 <?php
 
-use Monolog\Handler\TestHandler;
 use Monolog\Logger;
 use Sanprojects\Interceptor\Di;
 use Sanprojects\Interceptor\Interceptor;
@@ -14,9 +13,6 @@ Di::set('config', [
         'password' => '',
     ],
 ]);
-
-// clear logger handlers
-Di::get(Logger::class)->setHandlers([]);
 
 // intercept newly included files
 Interceptor::interceptAll();

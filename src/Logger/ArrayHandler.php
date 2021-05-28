@@ -2,7 +2,6 @@
 
 namespace Sanprojects\Interceptor\Logger;
 
-use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\TestHandler;
 
 class ArrayHandler extends TestHandler
@@ -10,7 +9,7 @@ class ArrayHandler extends TestHandler
     public function __construct()
     {
         parent::__construct();
-        $this->setFormatter(new LineFormatter(null, null, true,  true));
+        $this->setFormatter(new LineFormatter(null, 'Y-m-d\TH:i:s.uP', true, true));
     }
 
     public function getLogs(): array
