@@ -1,19 +1,20 @@
 <?php declare(strict_types=1);
 
+use Monolog\Handler\TestHandler;
 use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
 use Predis\Client;
 use Sanprojects\Interceptor\Di;
-use Sanprojects\Interceptor\Logger\ArrayHandler;
 use Sanprojects\Interceptor\Logger\LineFormatter;
 
 final class InterceptorTest extends TestCase
 {
-    private ArrayHandler $logsHandler;
+    private TestHandler $logsHandler;
 
     protected function setUp(): void
     {
-        $this->logsHandler = new ArrayHandler();
+        $this->logsHandler = new TestHandler();
+        $this->logsHandler->setFormatter(new LineFormatter(null, null, true, true));
         Di::getDefault()
             ->get(Logger::class)
             ->setHandlers([$this->logsHandler]);
@@ -21,7 +22,7 @@ final class InterceptorTest extends TestCase
 
     protected function getLogs(): array
     {
-        return $this->logsHandler->getFormattedLogs();
+        return array_column($this->logsHandler->getRecords(), 'formatted');
     }
 
     public function testStdInOut(): void
@@ -121,7 +122,7 @@ final class InterceptorTest extends TestCase
         $stmt->execute();
         self::assertSame([123 => '123', 124 => '123'], $stmt->fetch());
 
-        $logs = $this->getLogs();print_r($logs);
+        $logs = $this->getLogs();
         self::assertStringContainsString('PDO::__construct', $logs[0]);
         self::assertStringContainsString('SELECT 123', $logs[1]);
     }

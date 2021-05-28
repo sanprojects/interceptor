@@ -97,7 +97,7 @@ class CurlHook extends Hook
             $result[] = " --data '$data'";
         }
 
-        return implode(" \\ \n", $result);
+        return implode(" \\\n", $result);
     }
 
     public static function curl_exec($ch)
@@ -106,13 +106,56 @@ class CurlHook extends Hook
         self::$curlOpts[(int) $ch] = [];
         self::log(self::curlOptionsToCommand($options));
 
-        $logFile = fopen('php://memory', 'w+');
-        curl_setopt($ch, CURLOPT_STDERR, $logFile);
-        curl_setopt($ch, CURLOPT_VERBOSE, true);
 
-        $content = call_user_func_array(__FUNCTION__, func_get_args());
+        if (!empty($options[CURLOPT_INFILE]) && is_resource($options[CURLOPT_INFILE])) {
+            fseek($options[CURLOPT_INFILE], 0);
+            error_log('CURL> ' . fgets($options[CURLOPT_INFILE]));
+            fseek($options[CURLOPT_INFILE], 0);
+        }
+
+        if (!empty($options[CURLOPT_READFUNCTION])) {
+            $func = $options[CURLOPT_READFUNCTION];
+            \curl_setopt($ch, CURLOPT_READFUNCTION, function ($ch, $fh, $length) use (&$func, &$data) {
+                $ret = $func($ch, $fh, $length);
+                error_log('CURL> ' . $ret);
+
+                return $ret;
+            });
+        }
+
+        $isWriteFunction = !isset($options[CURLE_ABORTED_BY_CALLBACK]) && isset($options[CURLOPT_WRITEFUNCTION]);
+
+        if ($isWriteFunction) {
+            \curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($ch, $str) use ($options) {
+                self::log('curl write> ' . $str);
+
+                if (isset($options[CURLOPT_WRITEFUNCTION])) {
+                    return $options[CURLOPT_WRITEFUNCTION]($ch, $str);
+                }
+
+                return strlen($str);
+            });
+        }
+
+        $logFile = fopen('php://memory', 'w+');
+        \curl_setopt($ch, CURLOPT_STDERR, $logFile);
+        \curl_setopt($ch, CURLOPT_VERBOSE, true);
+
+        $content = \curl_exec(...func_get_args());
         fseek($logFile, 0);
-        self::log('CURL> ' . stream_get_contents($logFile));
+        self::log('curl log> ' . stream_get_contents($logFile));
+
+        if (!$isWriteFunction) {
+            $file = $options[CURLOPT_FILE] ?? null;
+            if (is_resource($file)) {
+                $pos = ftell($file);
+                fseek($file, 0);
+                self::log('curl file> ' . fgets($file));
+                fseek($file, $pos);
+            } else {
+                self::log('curl result> ' . $content);
+            }
+        }
 
         return $content;
     }
