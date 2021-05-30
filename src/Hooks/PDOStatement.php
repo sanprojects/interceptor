@@ -70,17 +70,17 @@ class PDOStatement extends \PDOStatement
         );
     }
 
-    public function rowCount ()
+    public function rowCount()
     {
         return PDOHook::hookFunction(
-            fn() => parent::fetch(...func_get_args()),
+            fn() => parent::rowCount(...func_get_args()),
             func_get_args(),
             [],
             'PDOStatement::fetch ' . $this->getServerName() . ' ' . $this->fullQuery()
         );
     }
 
-    public function fetchAll ($how = NULL, $class_name = NULL, $ctor_args = NULL)
+    public function fetchAll($how = NULL, $class_name = NULL, $ctor_args = NULL)
     {
         return PDOHook::hookFunction(
             fn() => parent::fetchAll(...func_get_args()),
@@ -90,7 +90,7 @@ class PDOStatement extends \PDOStatement
         );
     }
 
-    public function fetchObject ($class_name = NULL, $ctor_args = NULL)
+    public function fetchObject($class_name = NULL, $ctor_args = NULL)
     {
         return PDOHook::hookFunction(
             fn() => parent::fetchObject(...func_get_args()),

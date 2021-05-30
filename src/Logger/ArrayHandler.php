@@ -9,7 +9,7 @@ class ArrayHandler extends TestHandler
     public function __construct()
     {
         parent::__construct();
-        $this->setFormatter(new LineFormatter(null, 'Y-m-d\TH:i:s.uP', true, true));
+        $this->setFormatter(new LineFormatter(null, 'Y-m-d\\TH:i:s.u\\Z', true, true));
     }
 
     public function getLogs(): array
@@ -17,7 +17,7 @@ class ArrayHandler extends TestHandler
         $result = [];
         foreach ($this->getRecords() as $record) {
             $row = [
-                'time' => $record['datetime']->format("Y-m-d H:i:s.u"),
+                'time' => $record['datetime']->format("Y-m-d\\TH:i:s.u\\Z"),
                 'message' => $record['message'],
                 'context' => $record['context'],
             ];
