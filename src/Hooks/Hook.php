@@ -33,13 +33,13 @@ class Hook
                 continue;
             }
 
-            $patterns['@new\s+\\\?' . $oldClassEscaped . '\W*\(@'] = 'new \\' . $newClass . '(';
-            $patterns['@extends\s+\\\?' . $oldClassEscaped . '\b@'] = 'extends \\' . $newClass;
+            $patterns['@new\s+\\\\?' . $oldClassEscaped . '\W*\(@'] = 'new \\' . $newClass . '(';
+            $patterns['@extends\s+\\\\?' . $oldClassEscaped . '\b@'] = 'extends \\' . $newClass;
 
             $shortName = $this->getClassShortName($oldClass);
             if ($shortName && $oldClassUse) {
-                $patterns['@new\s+\\\?' . $shortName . '\W*\(@'] = 'new \\' . $newClass . '(';
-                $patterns['@extends\s+\\\?' . $shortName . '\b@'] = 'extends \\' . $newClass;
+                $patterns['@new\s+\\\\?' . $shortName . '\W*\(@'] = 'new \\' . $newClass . '(';
+                $patterns['@extends\s+\\\\?' . $shortName . '\b@'] = 'extends \\' . $newClass;
             }
         }
 
@@ -48,6 +48,10 @@ class Hook
 
     public function getClassUse(string $code, string $class): string
     {
+        if (preg_match('@\buse\s+?([\\\\]*?' . preg_quote($class, '/') . ')\b@', $code, $matches)) {
+            return $matches[1];
+        }
+
         return preg_match('@\buse\s+?([\w\\\\]*?' . preg_quote($class, '/') . ')\b@', $code, $matches)
             ? $matches[1]
             : '';
@@ -101,11 +105,13 @@ class Hook
         return $result;
     }
 
-    public static function __callStatic($name, $args) {
+    public static function __callStatic($name, $args)
+    {
         return self::hookFunction($name, $args);
     }
 
-    public static function performResult($result) {
+    public static function performResult($result)
+    {
         return $result;
     }
 
@@ -117,10 +123,10 @@ class Hook
 
         if (is_array($callable)) {
             if (is_object($callable[0])) {
-                return sprintf("%s::%s", get_class($callable[0]), trim($callable[1]));
+                return sprintf('%s::%s', get_class($callable[0]), trim($callable[1]));
             }
 
-            return sprintf("%s::%s", trim($callable[0]), trim($callable[1]));
+            return sprintf('%s::%s', trim($callable[0]), trim($callable[1]));
         }
 
         if (is_object($callable)) {
