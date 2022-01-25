@@ -80,7 +80,7 @@ class PDOStatement extends \PDOStatement
         );
     }
 
-    public function fetchAll($how = NULL, $class_name = NULL, $ctor_args = NULL)
+    public function fetchAll(int $mode = PDO::FETCH_DEFAULT, mixed ...$args)
     {
         return PDOHook::hookFunction(
             fn() => parent::fetchAll(...func_get_args()),

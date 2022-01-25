@@ -15,7 +15,12 @@ class FileHook extends Hook
         'file_put_contents',
     ];
 
-    protected const EXCLUDED_FILENAMES = ['php://stderr', 'php://temp', 'php://input'];
+    protected const EXCLUDED_FILENAMES = [
+        'php://stderr',
+        'php://temp',
+        'php://input',
+        'php://memory',
+    ];
     protected static $fileHandlers = [];
 
     public static function stream_socket_client($remote_socket, &$errno, &$errstr, $timeout = null, $flags = null, $context = null)
