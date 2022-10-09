@@ -6,9 +6,9 @@ class CurlHook extends Hook
 {
     protected const HOOKED_FUNCTIONS = [
         'curl_exec',
+        'curl_multi_exec',
         'curl_setopt',
         'curl_setopt_array',
-        'curl_multi_exec',
     ];
 
     protected const CURL_VERSIONS = [
@@ -158,5 +158,18 @@ class CurlHook extends Hook
         }
 
         return $content;
+    }
+
+    public static function curl_multi_exec($multi_handle, &$still_running = 0)
+    {
+        $status = curl_multi_exec($multi_handle, $still_running);
+
+        if (!$still_running) {
+            foreach (self::$curlOpts as $ch => $options) {
+                self::log(self::curlOptionsToCommand($options));
+            }
+        }
+
+        return $status;
     }
 }
