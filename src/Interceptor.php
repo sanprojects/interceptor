@@ -289,7 +289,7 @@ class Interceptor extends \php_user_filter
         }
         $this->intercept();
 
-        return $result;
+        return $result ?? false;
     }
 
     /**
