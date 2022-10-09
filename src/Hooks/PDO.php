@@ -27,6 +27,11 @@ class PDO extends \PDO
 
         return $statement;
     }
+    
+    public function exec(string $statement)
+    {
+        return PDOHook::hookFunction(fn() => parent::exec(...func_get_args()), func_get_args(), [], 'PDO::exec ' . $this->serverName);
+    }
 
     public function commit()
     {
