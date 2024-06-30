@@ -2,7 +2,7 @@
   "name": "sanprojects/interceptor",
   "type": "library",
   "description": "Intercept php functions",
-  "keywords": ["intercept", "functions", "curl"],
+  "keywords": ["intercept", "debug", "php", "curl", "pdo", "mysqli", "redis"],
   "homepage": "https://github.com/sanprojects/interceptor",
   "license": "MIT",
   "support": {
@@ -23,7 +23,6 @@
   "require-dev": {
     "phpunit/phpunit": ">=7",
     "ext-mysqli": "*",
-    "ext-redis": "*",
     "predis/predis": "^1.1"
   },
   "suggest": {
@@ -37,5 +36,15 @@
     "psr-4": {
       "Sanprojects\\Interceptor\\Tests\\": "tests/"
     }
+  },
+  "prefer-stable": true,
+  "bin": [
+    "interceptor"
+  ],
+  "scripts": {
+    "interceptor": "@php ./interceptor"
+  },
+  "scripts-descriptions": {
+    "interceptor": "Run php script and intercept functions calls"
   }
 }
