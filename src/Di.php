@@ -35,7 +35,6 @@ class Di
     {
         $builder = new ContainerBuilder();
         $builder->useAutowiring(false);
-        $builder->useAnnotations(false);
         $builder->addDefinitions(__DIR__ . '/diConfig.php');
         self::$container = $builder->build();
 
