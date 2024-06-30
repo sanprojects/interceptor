@@ -106,17 +106,17 @@ final class InterceptorTest extends TestCase
         $stmt = $dbh->prepare('SELECT :test;');
         $stmt->bindValue(':test', 123, PDO::PARAM_INT);
         $stmt->execute();
-        self::assertSame('123', $stmt->fetchColumn());
+        self::assertSame(123, $stmt->fetchColumn());
 
         $stmt = $dbh->prepare('SELECT :test;');
         $stmt->bindValue(':test', 123, PDO::PARAM_INT);
         $stmt->execute();
-        self::assertSame([[123 => '123', 124 => '123']], $stmt->fetchAll());
+        self::assertSame([[123 => 123, 0 => 123]], $stmt->fetchAll());
 
         $stmt = $dbh->prepare('SELECT :test;');
         $stmt->bindValue(':test', 123, PDO::PARAM_INT);
         $stmt->execute();
-        self::assertSame([123 => '123', 124 => '123'], $stmt->fetch());
+        self::assertSame([123 => 123, 0 => 123], $stmt->fetch());
 
         $logs = $this->getLogs();
         self::assertStringContainsString('PDO::__construct', $logs[0]);
