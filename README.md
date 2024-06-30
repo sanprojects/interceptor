@@ -8,10 +8,8 @@ composer require sanprojects/interceptor
 ```
 ## Basic Usage:
 ```php
-// intercept newly included files
-if (($_REQUEST['interceptor'] ?? '') || in_array('--interceptor', $_SERVER['argv'] ?? [])) {
-    \Sanprojects\Interceptor\Interceptor::interceptAll();
-}
+// Intercept all kind of requests
+\Sanprojects\Interceptor\Interceptor::interceptAll();
 ```
 Now in the console you'll see something like this:
 ```
@@ -42,5 +40,19 @@ curl, fwrite, fread, file_get_contents, file_put_contents, mysqli, Redis, PDO, A
 ## Caveats
 - It turns off opcache.
 - Because of source code injection, it can crush your app. Not all cases tested.
+
+## How to inject
+Option 1: include in your script
+```php
+\Sanprojects\Interceptor\Interceptor::interceptAll();
+```
+Option 2: include php file in your script
+```php
+require 'vendor/bin/interceptor';
+```
+Option 3: use `auto_prepend_file`
+```bash
+php -d auto_prepend_file=vendor/bin/interceptor <yourScript.php>
+```
 
 Use it only for debug environment.
