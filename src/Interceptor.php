@@ -691,4 +691,15 @@ class Interceptor extends \php_user_filter
 
         return $interceptor;
     }
+
+    public static function load(): void
+    {
+        if (
+            (isset($_REQUEST['interceptor']) && $_REQUEST['interceptor'])
+            || (isset($_ENV['interceptor']) && $_ENV['interceptor'])
+            || in_array('--interceptor', $_SERVER['argv'] ?? [], true)
+        ) {
+            self::interceptAll();
+        }
+    }
 }
