@@ -34,7 +34,6 @@ class Di
     private static function build(): Container
     {
         $builder = new ContainerBuilder();
-        $builder->useAutowiring(false);
         $builder->addDefinitions(__DIR__ . '/diConfig.php');
         self::$container = $builder->build();
 

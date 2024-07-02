@@ -2,6 +2,7 @@
 
 namespace Sanprojects\Interceptor;
 
+use Monolog\Logger;
 use Sanprojects\Interceptor\Hooks\AMQPHook;
 use Sanprojects\Interceptor\Hooks\CurlHook;
 use Sanprojects\Interceptor\Hooks\FileHook;
@@ -649,9 +650,11 @@ class Interceptor extends \php_user_filter
 
             $bufferHandle = fopen('php://temp', 'w+');
             $outBucket = stream_bucket_new($bufferHandle, $this->code);
+
             if (false === $outBucket) {
                 return PSFS_ERR_FATAL;
             }
+
             stream_bucket_append($out, $outBucket);
             $this->code = '';
         }
@@ -688,6 +691,8 @@ class Interceptor extends \php_user_filter
         $interceptor
             ->addAllHooks()
             ->intercept();
+
+        Di::get(Logger::class)->debug('Installed successfully');
 
         return $interceptor;
     }
