@@ -21,7 +21,7 @@ class Hook
 
         $patterns = static::PATTERNS;
         foreach (static::HOOKED_FUNCTIONS as $func) {
-            $patterns['/(?<!::|->|\w_)\\\?' . $func . '\s*\(/'] = '\\' . static::class . '::' . $func . '(';
+            $patterns['/(?<!::|->|\w_|function\s)\\\?' . $func . '\s*\(/'] = '\\' . static::class . '::' . $func . '(';
         }
 
         foreach (static::HOOKED_CLASSES as $oldClass => $newClass) {
