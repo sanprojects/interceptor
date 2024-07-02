@@ -39,10 +39,10 @@
   },
   "prefer-stable": true,
   "bin": [
-    "interceptor"
+    "interceptor.php"
   ],
   "scripts": {
-    "interceptor": "@php ./interceptor"
+    "interceptor": "@php ./interceptor.php"
   },
   "scripts-descriptions": {
     "interceptor": "Run php script and intercept functions calls"
