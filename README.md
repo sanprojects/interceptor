@@ -48,11 +48,11 @@ Option 1: include in your script
 ```
 Option 2: include php file in your script
 ```php
-require 'vendor/bin/interceptor';
+require 'vendor/bin/interceptor.php';
 ```
 Option 3: use `auto_prepend_file`
 ```bash
-php -d auto_prepend_file=vendor/bin/interceptor <yourScript.php>
+php -d auto_prepend_file=vendor/bin/interceptor.php <yourScript.php>
 ```
 
 Use it only for debug environment.
