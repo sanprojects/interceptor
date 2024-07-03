@@ -16,6 +16,7 @@ class FileHook extends Hook
     ];
 
     protected const EXCLUDED_FILENAMES = [
+        'php://stdout',
         'php://stderr',
         'php://temp',
         'php://input',
