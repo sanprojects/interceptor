@@ -2,9 +2,29 @@
 
 namespace Sanprojects\Interceptor\Logger;
 
-class LineFormatter extends \Monolog\Formatter\LineFormatter
+use DateTime;
+
+class Logger
 {
-    private int $maxLineLength = 100000;
+    public function __construct(
+        private string $title = '',
+        private array $handlers = [],
+        private $maxLineLength = 100000,
+    )
+    {
+    }
+
+    public function debug(string $message, array $data = []): void
+    {
+        $formatedMessage = '[' . (new DateTime())->format('Y-m-d\TH:i:s.u\Z') . '] '
+            . $this->title . '.DEBUG: '
+            . $message . ' '
+            . $this->convertToString($data);
+
+        foreach ($this->handlers as $handler) {
+            $handler->handle($formatedMessage);
+        }
+    }
 
     /**
      * @param int $maxLineLength
@@ -37,7 +57,7 @@ class LineFormatter extends \Monolog\Formatter\LineFormatter
             return implode(' ', array_map(fn($v) => $this->toString($v), $data));
         }
 
-        return $this->toJson($data, true);
+        return json_encode($data);
     }
 
     protected function toString($data): string
@@ -50,6 +70,10 @@ class LineFormatter extends \Monolog\Formatter\LineFormatter
             return (string) $data;
         }
 
-        return $this->toJson($data, true);
+        if (is_resource($data)) {
+            return (string) $data;
+        }
+
+        return json_encode($data);
     }
 }

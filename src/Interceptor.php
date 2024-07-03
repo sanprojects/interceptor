@@ -2,13 +2,13 @@
 
 namespace Sanprojects\Interceptor;
 
-use Monolog\Logger;
 use Sanprojects\Interceptor\Hooks\AMQPHook;
 use Sanprojects\Interceptor\Hooks\CurlHook;
 use Sanprojects\Interceptor\Hooks\FileHook;
 use Sanprojects\Interceptor\Hooks\MysqliHook;
 use Sanprojects\Interceptor\Hooks\PDOHook;
 use Sanprojects\Interceptor\Hooks\RedisHook;
+use Sanprojects\Interceptor\Logger\Logger;
 
 /**
  * Implementation adapted from:

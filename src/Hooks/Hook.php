@@ -2,8 +2,8 @@
 
 namespace Sanprojects\Interceptor\Hooks;
 
-use Monolog\Logger;
 use Sanprojects\Interceptor\Di;
+use Sanprojects\Interceptor\Logger\Logger;
 
 class Hook
 {

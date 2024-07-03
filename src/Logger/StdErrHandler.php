@@ -2,20 +2,10 @@
 
 namespace Sanprojects\Interceptor\Logger;
 
-use Monolog\Handler\StreamHandler;
-
-/**
- * Stores to any stream resource
- *
- * Can be used to store into php://stderr, remote and local files, etc.
- *
- * @author Jordi Boggiano <j.boggiano@seld.be>
- */
-class StdErrHandler extends StreamHandler
+class StdErrHandler implements HandlerInterface
 {
-    public function __construct()
+    public function handle($formatedMessage): void
     {
-        parent::__construct('php://stderr');
-        $this->setFormatter(new LineFormatter(null, "Y-m-d\\TH:i:s.u\\Z", true, true));
+        fwrite(STDERR, $formatedMessage . PHP_EOL);
     }
 }
