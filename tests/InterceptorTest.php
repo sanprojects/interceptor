@@ -1,6 +1,5 @@
 <?php declare(strict_types=1);
 
-use Monolog\Handler\TestHandler;
 use PHPUnit\Framework\TestCase;
 use Predis\Client;
 use Sanprojects\Interceptor\Di;
@@ -8,17 +7,14 @@ use Sanprojects\Interceptor\Logger\ArrayHandler;
 
 final class InterceptorTest extends TestCase
 {
-    private TestHandler $logsHandler;
-
     protected function setUp(): void
     {
-        $this->logsHandler = Di::getDefault()->get(ArrayHandler::class);
-        $this->logsHandler->clear();
+        Di::get(ArrayHandler::class)->clearRecords();
     }
 
     protected function getLogs(): array
     {
-        return $this->logsHandler->getFormattedLogs();
+        return Di::get(ArrayHandler::class)->getRecords();
     }
 
     public function testStdInOut(): void
@@ -45,14 +41,15 @@ final class InterceptorTest extends TestCase
     public function testFileGetContents(): void
     {
         self::assertSame('test', file_get_contents(__DIR__ . '/test.txt'));
-        self::assertTrue($this->logsHandler->hasDebugThatContains('file_get_contents'));
+        $logs = $this->getLogs();
+        self::assertStringContainsString('file_get_contents', $logs[0]);
     }
 
     public function testFilePutContents(): void
     {
         self::assertSame(4, file_put_contents(__DIR__ . '/test.txt', 'test'));
         $logs = $this->getLogs();
-        self::assertTrue($this->logsHandler->hasDebugThatContains('file_put_contents'));
+        self::assertStringContainsString('file_put_contents', $logs[0]);
         self::assertStringContainsString('test.txt', $logs[0]);
         self::assertStringContainsString('test', $logs[0]);
     }

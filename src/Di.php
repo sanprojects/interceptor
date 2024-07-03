@@ -5,38 +5,46 @@ namespace Sanprojects\Interceptor;
 use DI\Container;
 use DI\ContainerBuilder;
 use DI\Definition\Helper\DefinitionHelper;
+use Sanprojects\Interceptor\Logger\ArrayHandler;
+use Sanprojects\Interceptor\Logger\Logger;
+use Sanprojects\Interceptor\Logger\StdErrHandler;
 
 class Di
 {
-    private static Container $container;
+    private static array $definitions = [];
+    private static array $container = [];
 
     public static function get($name)
     {
-        return self::getDefault()->get($name);
+        self::build();
+
+        return self::$container[$name] = self::$container[$name] ?? self::$definitions[$name]();
     }
 
-    /**
-     * Define an object or a value in the container.
-     *
-     * @param string $name Entry name
-     * @param mixed|DefinitionHelper $value Value, use definition helpers to define objects
-     */
-    public static function set($name, $value)
+    public static function set($name, $value): void
     {
-        return self::getDefault()->set($name, $value);
+        self::$definitions[$name] = $value;
     }
 
-    public static function getDefault(): Container
+    private static function build(): void
     {
-        return self::$container ?? self::build();
-    }
+        static $isBuilt = false;
 
-    private static function build(): Container
-    {
-        $builder = new ContainerBuilder();
-        $builder->addDefinitions(__DIR__ . '/diConfig.php');
-        self::$container = $builder->build();
+        if ($isBuilt) {
+            return;
+        }
 
-        return self::$container;
+        $isBuilt = true;
+
+        self::set(ArrayHandler::class, function() {
+            return new ArrayHandler();
+        });
+
+        self::set(Logger::class, function() {
+            return new Logger('Interceptor', [
+                new StdErrHandler(),
+                self::get(ArrayHandler::class)
+            ]);
+        });
     }
 }

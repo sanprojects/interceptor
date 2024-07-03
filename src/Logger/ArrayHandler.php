@@ -2,39 +2,24 @@
 
 namespace Sanprojects\Interceptor\Logger;
 
-use Monolog\Handler\TestHandler;
-
-class ArrayHandler extends TestHandler
+class ArrayHandler implements HandlerInterface
 {
-    public function __construct()
+    private int $maxRecordsCount = 1000;
+    private array $records = [];
+
+    public function handle($formatedMessage): void
     {
-        parent::__construct();
-        $this->setFormatter(new LineFormatter(null, 'Y-m-d\\TH:i:s.u\\Z', true, true));
+        $this->records[] = $formatedMessage;
+        $this->records = array_slice($this->records, -$this->maxRecordsCount);
     }
 
-    public function getLogs(): array
+    public function getRecords(): array
     {
-        $result = [];
-        foreach ($this->getRecords() as $record) {
-            $row = [
-                'time' => $record['datetime']->format("Y-m-d\\TH:i:s.u\\Z"),
-                'message' => $record['message'],
-                'context' => $record['context'],
-            ];
-            if ($record['context']) {
-                $row['context'] = $record['context'];
-            }
-            if ($record['extra']) {
-                $row['extra'] = $record['extra'];
-            }
-            $result[] = $row;
-        }
-
-        return $result;
+        return $this->records;
     }
 
-    public function getFormattedLogs(): array
+    public function clearRecords(): void
     {
-        return array_column($this->getRecords(), 'formatted');
+        $this->records = [];
     }
 }
