@@ -33,6 +33,7 @@ tag:
 	echo "Tagged with $NEW_TAG"
 
 phar:
-	rm interceptor.phar
+	rm interceptor.phar*
 	php -d phar.readonly=off create-phar.php
+	chmod a+x interceptor.phar*
 	ls -la | grep phar
