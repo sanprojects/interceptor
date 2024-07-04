@@ -65,6 +65,7 @@ class StreamWrapper extends \php_user_filter
     {
         if (!$this->isIntercepting) {
             ini_set('opcache.enable', '0');
+            ini_set('opcache.enable_cli', '0');
             stream_wrapper_unregister(self::PROTOCOL);
             $this->code = '';
             $this->isIntercepting = stream_wrapper_register(self::PROTOCOL, __CLASS__);

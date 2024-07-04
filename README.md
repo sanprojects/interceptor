@@ -42,17 +42,25 @@ curl, fwrite, fread, file_get_contents, file_put_contents, mysqli, Redis, PDO, A
 - Because of source code injection, it can crush your app. Not all cases tested.
 
 ## How to inject
-Option 1: include in your script
+Option 1: Run interceptor.phar
+```bash
+curl -O https://sanprojects.github.io/interceptor/interceptor.phar
+php -d opcache.enable=0 interceptor.phar <yourScript.php>
+```
+
+Option 2: Use `auto_prepend_file`
+```bash
+curl -O https://sanprojects.github.io/interceptor/interceptor.phar
+php -d opcache.enable=0 -d auto_prepend_file=interceptor.php <yourScript.php>
+```
+
+Option 1: Include in your script
 ```php
 \Sanprojects\Interceptor\Interceptor::interceptAll();
 ```
-Option 2: include php file in your script
+Option 2: Include php file in your script
 ```php
 require 'vendor/bin/interceptor.php';
-```
-Option 3: use `auto_prepend_file`
-```bash
-php -d auto_prepend_file=vendor/bin/interceptor.php <yourScript.php>
 ```
 
 Use it only for debug environment.
