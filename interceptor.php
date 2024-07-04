@@ -1,7 +1,7 @@
 #!/usr/bin/env php
 <?php
 
-namespace Sanprojects\Interceptor;
+use Sanprojects\Interceptor\Interceptor;
 
 spl_autoload_register(function ($class) {
     $prefix = 'Sanprojects\\Interceptor';
@@ -21,3 +21,15 @@ spl_autoload_register(function ($class) {
 });
 
 Interceptor::interceptAll();
+
+// load php file from command line
+if (isCliApp()) {
+    $argv = $_SERVER['argv'] = array_slice($argv, 1);
+    include $argv[0];
+}
+
+function isCliApp(): bool {
+    $appName = $_SERVER['argv'][0] ?? '';
+
+    return str_contains($appName, 'interceptor.ph');
+}
