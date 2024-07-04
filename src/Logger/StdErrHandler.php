@@ -6,6 +6,6 @@ class StdErrHandler implements HandlerInterface
 {
     public function handle($formatedMessage): void
     {
-        fwrite(STDERR, $formatedMessage . PHP_EOL);
+        fwrite(\STDERR, $formatedMessage . \PHP_EOL);
     }
 }
