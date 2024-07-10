@@ -24,6 +24,7 @@ class PDOStatement extends \PDOStatement
     public PDO $pdo;
     protected array $params = [];
 
+    #[\ReturnTypeWillChange]
     public function bindValue($param, $value, $type = \PDO::PARAM_STR)
     {
         $this->params[$param] = $value;
@@ -31,6 +32,7 @@ class PDOStatement extends \PDOStatement
         return parent::bindValue(...func_get_args());
     }
 
+    #[\ReturnTypeWillChange]
     public function bindParam($column, &$variable, $type = \PDO::PARAM_STR, $length = null, $driverOptions = null)
     {
         $this->params[$column] = $variable;
@@ -38,6 +40,7 @@ class PDOStatement extends \PDOStatement
         return parent::bindParam(...func_get_args());
     }
 
+    #[\ReturnTypeWillChange]
     public function execute($params = null)
     {
         $this->params = array_merge($params ?? [], $this->params);
@@ -50,6 +53,7 @@ class PDOStatement extends \PDOStatement
         );
     }
 
+    #[\ReturnTypeWillChange]
     public function fetchColumn($column = 0)
     {
         return PDOHook::hookFunction(
@@ -60,6 +64,7 @@ class PDOStatement extends \PDOStatement
         );
     }
 
+    #[\ReturnTypeWillChange]
     public function fetch($mode = PDO::FETCH_BOTH, $cursorOrientation = PDO::FETCH_ORI_NEXT, $cursorOffset = 0)
     {
         return PDOHook::hookFunction(
@@ -70,6 +75,7 @@ class PDOStatement extends \PDOStatement
         );
     }
 
+    #[\ReturnTypeWillChange]
     public function rowCount()
     {
         return PDOHook::hookFunction(
@@ -80,6 +86,7 @@ class PDOStatement extends \PDOStatement
         );
     }
 
+    #[\ReturnTypeWillChange]
     public function fetchAll(int $mode = PDO::FETCH_DEFAULT, mixed ...$args)
     {
         return PDOHook::hookFunction(
@@ -90,6 +97,7 @@ class PDOStatement extends \PDOStatement
         );
     }
 
+    #[\ReturnTypeWillChange]
     public function fetchObject($class_name = NULL, $ctor_args = NULL)
     {
         return PDOHook::hookFunction(
