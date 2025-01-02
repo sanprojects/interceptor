@@ -36,11 +36,11 @@ class Di
 
         $isBuilt = true;
 
-        self::set(ArrayHandler::class, function() {
+        self::set(ArrayHandler::class, function () {
             return new ArrayHandler();
         });
 
-        self::set(Logger::class, function() {
+        self::set(Logger::class, function () {
             return new Logger('Interceptor', [
                 new StdErrHandler(),
                 self::get(ArrayHandler::class)
@@ -48,3 +48,4 @@ class Di
         });
     }
 }
+

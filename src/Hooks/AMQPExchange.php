@@ -5,7 +5,7 @@ namespace Sanprojects\Interceptor\Hooks;
 
 class AMQPExchange extends \AMQPExchange
 {
-    public function publish($message, $routing_key = null, $flags = AMQP_NOPARAM, array $attributes = array())
+    public function publish($message, $routing_key = null, $flags = AMQP_NOPARAM, array $attributes = array()) 
     {
         return Hook::hookFunction(
             fn() => parent::publish(...func_get_args()),
@@ -15,3 +15,4 @@ class AMQPExchange extends \AMQPExchange
         );
     }
 }
+

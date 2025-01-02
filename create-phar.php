@@ -6,3 +6,4 @@ $phar->setDefaultStub('interceptor.php', 'interceptor.php');
 $phar->compress(Phar::GZ);
 $phar->stopBuffering();
 echo "Phar archive created successfully.";
+
