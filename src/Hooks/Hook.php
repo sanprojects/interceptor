@@ -4,6 +4,7 @@ namespace Sanprojects\Interceptor\Hooks;
 
 use Sanprojects\Interceptor\Di;
 use Sanprojects\Interceptor\Logger\Logger;
+use Exception;
 
 class Hook
 {
@@ -20,6 +21,7 @@ class Hook
         }
 
         $patterns = static::PATTERNS;
+
         foreach (static::HOOKED_FUNCTIONS as $func) {
             $patterns['/(?<!::|->|\w_|function\s)\\\?' . $func . '\s*\(/'] = '\\' . static::class . '::' . $func . '(';
         }
@@ -33,13 +35,14 @@ class Hook
                 continue;
             }
 
-            $patterns['@new\s+\\\\?' . $oldClassEscaped . '\W*\(@'] = 'new \\' . $newClass . '(';
-            $patterns['@extends\s+\\\\?' . $oldClassEscaped . '\b@'] = 'extends \\' . $newClass;
+            $patterns['@new\s+\\\?' . $oldClassEscaped . '\W*\(@'] = 'new \\' . $newClass . '(';
+            $patterns['@extends\s+\\\?' . $oldClassEscaped . '\b@'] = 'extends \\' . $newClass;
 
             $shortName = $this->getClassShortName($oldClass);
+
             if ($shortName && $oldClassUse) {
-                $patterns['@new\s+\\\\?' . $shortName . '\W*\(@'] = 'new \\' . $newClass . '(';
-                $patterns['@extends\s+\\\\?' . $shortName . '\b@'] = 'extends \\' . $newClass;
+                $patterns['@new\s+\\\?' . $shortName . '\W*\(@'] = 'new \\' . $newClass . '(';
+                $patterns['@extends\s+\\\?' . $shortName . '\b@'] = 'extends \\' . $newClass;
             }
         }
 
@@ -48,18 +51,18 @@ class Hook
 
     public function getClassUse(string $code, string $class): string
     {
-        if (preg_match('@\buse\s+?([\\\\]*?' . preg_quote($class, '/') . ')\b@', $code, $matches)) {
+        if (preg_match('@\buse\s+?([\\\]*?' . preg_quote($class, '/') . ')\b@', $code, $matches)) {
             return $matches[1];
         }
 
-        return preg_match('@\buse\s+?([\w\\\\]*?' . preg_quote($class, '/') . ')\b@', $code, $matches)
+        return preg_match('@\buse\s+?([\w\\\]*?' . preg_quote($class, '/') . ')\b@', $code, $matches)
             ? $matches[1]
             : '';
     }
 
     public function getNamespace(string $code): string
     {
-        return preg_match('@\bnamespace\s+?([\w\\\\]+?);@', $code, $matches)
+        return preg_match('@\bnamespace\s+?([\w\\\]+?);@', $code, $matches)
             ? $matches[1]
             : '';
     }
@@ -71,9 +74,6 @@ class Hook
         return $classParts > 1 ? end($classParts) : '';
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public static function log(string $message, $data = []): void
     {
         Di::get(Logger::class)->debug($message, $data);
@@ -83,17 +83,19 @@ class Hook
     {
         // prevent hook inside another hook
         if (self::$disableHook) {
-            return call_user_func_array($callble, $args);
+            return $callble(...$args);
         }
 
         self::$disableHook = true;
         $funcName = $name ?: self::getCallableName($callble);
+
         try {
-            $result = call_user_func_array($callble, $args);
-        } catch (\Exception $e) {
+            $result = $callble(...$args);
+        } catch (Exception $e) {
             $args = $extra ?: $args;
             $args[] = $e->getMessage();
             self::log($funcName, $args);
+
             throw $e;
         }
 
@@ -115,7 +117,7 @@ class Hook
         return $result;
     }
 
-    static function getCallableName($callable): string
+    public static function getCallableName($callable): string
     {
         if (is_string($callable)) {
             return trim($callable);
@@ -130,7 +132,7 @@ class Hook
         }
 
         if (is_object($callable)) {
-            return get_class($callable);
+            return $callable::class;
         }
 
         return 'unknown';

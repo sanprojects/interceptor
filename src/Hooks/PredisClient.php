@@ -32,7 +32,7 @@ class PredisClient extends \Predis\Client
             fn() => parent::__call(...func_get_args()),
             func_get_args(),
             $arguments,
-            'Redis ' . $this->connectionHost . ' ' .$commandID
+            'Redis ' . $this->connectionHost . ' ' . $commandID
         );
     }
 }

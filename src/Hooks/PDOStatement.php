@@ -1,4 +1,5 @@
 <?php
+
 /*
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -19,12 +20,14 @@
 
 namespace Sanprojects\Interceptor\Hooks;
 
+use ReturnTypeWillChange;
+
 class PDOStatement extends \PDOStatement
 {
     public PDO $pdo;
     protected array $params = [];
 
-    #[\ReturnTypeWillChange]
+    #[ReturnTypeWillChange]
     public function bindValue($param, $value, $type = \PDO::PARAM_STR)
     {
         $this->params[$param] = $value;
@@ -32,7 +35,7 @@ class PDOStatement extends \PDOStatement
         return parent::bindValue(...func_get_args());
     }
 
-    #[\ReturnTypeWillChange]
+    #[ReturnTypeWillChange]
     public function bindParam($column, &$variable, $type = \PDO::PARAM_STR, $length = null, $driverOptions = null)
     {
         $this->params[$column] = $variable;
@@ -40,7 +43,7 @@ class PDOStatement extends \PDOStatement
         return parent::bindParam(...func_get_args());
     }
 
-    #[\ReturnTypeWillChange]
+    #[ReturnTypeWillChange]
     public function execute($params = null)
     {
         $this->params = array_merge($params ?? [], $this->params);
@@ -53,7 +56,7 @@ class PDOStatement extends \PDOStatement
         );
     }
 
-    #[\ReturnTypeWillChange]
+    #[ReturnTypeWillChange]
     public function fetchColumn($column = 0)
     {
         return PDOHook::hookFunction(
@@ -64,7 +67,7 @@ class PDOStatement extends \PDOStatement
         );
     }
 
-    #[\ReturnTypeWillChange]
+    #[ReturnTypeWillChange]
     public function fetch($mode = PDO::FETCH_BOTH, $cursorOrientation = PDO::FETCH_ORI_NEXT, $cursorOffset = 0)
     {
         return PDOHook::hookFunction(
@@ -75,7 +78,7 @@ class PDOStatement extends \PDOStatement
         );
     }
 
-    #[\ReturnTypeWillChange]
+    #[ReturnTypeWillChange]
     public function rowCount()
     {
         return PDOHook::hookFunction(
@@ -86,7 +89,7 @@ class PDOStatement extends \PDOStatement
         );
     }
 
-    #[\ReturnTypeWillChange]
+    #[ReturnTypeWillChange]
     public function fetchAll(int $mode = PDO::FETCH_DEFAULT, mixed ...$args)
     {
         return PDOHook::hookFunction(
@@ -97,8 +100,8 @@ class PDOStatement extends \PDOStatement
         );
     }
 
-    #[\ReturnTypeWillChange]
-    public function fetchObject($class_name = NULL, $ctor_args = NULL)
+    #[ReturnTypeWillChange]
+    public function fetchObject($class_name = null, $ctor_args = null)
     {
         return PDOHook::hookFunction(
             fn() => parent::fetchObject(...func_get_args()),
@@ -125,6 +128,7 @@ class PDOStatement extends \PDOStatement
      *
      * @param string $query The sql query with parameter placeholders
      * @param array $params The array of substitution parameters
+     *
      * @return string The interpolated query
      */
     private function interpolateQuery($query, $params): string
@@ -132,10 +136,10 @@ class PDOStatement extends \PDOStatement
         $keys = [];
         $values = [];
 
-        # build a regular expression for each parameter
+        // build a regular expression for each parameter
         foreach ($params as $key => $value) {
             if (is_string($key)) {
-                $keys[] = '/'.$key.'/';
+                $keys[] = '/' . $key . '/';
             } else {
                 $keys[] = '/[?]/';
             }
@@ -144,7 +148,7 @@ class PDOStatement extends \PDOStatement
                 $values[$key] = "'" . $value . "'";
             } elseif (is_array($value)) {
                 $values[$key] = "'" . implode("','", $value) . "'";
-            } elseif (is_null($value)) {
+            } elseif ($value === null) {
                 $values[$key] = 'NULL';
             } else {
                 $values[$key] = $value;

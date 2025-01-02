@@ -15,13 +15,17 @@ class Redis extends \Redis
         return Hook::hookFunction(fn() => parent::connect(...func_get_args()), func_get_args());
     }
 
-    public function get($key) {
+    public function get($key)
+    {
         $name = __FUNCTION__;
+
         return Hook::hookFunction(fn() => parent::{$name}(...func_get_args()), func_get_args());
     }
 
-    public function set($key, $value, $timeout = null) {
+    public function set($key, $value, $timeout = null)
+    {
         $name = __FUNCTION__;
+
         return Hook::hookFunction(fn() => parent::{$name}(...func_get_args()), func_get_args());
     }
 }

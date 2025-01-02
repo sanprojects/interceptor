@@ -51,14 +51,14 @@ class CurlHook extends Hook
 
         $method = ($options[CURLOPT_CUSTOMREQUEST] ?? '') ?: (isset($options[CURLOPT_POST]) ? 'POST' : 'GET');
         $url = $options[CURLOPT_URL] ?? '';
-        $result[] = "curl -vX $method '$url'";
+        $result[] = "curl -vX {$method} '{$url}'";
 
         foreach ($options[CURLOPT_HTTPHEADER] ?? [] as $k => $v) {
             if (!$v || $v[strlen($v) - 1] === ':') {
                 continue;
             }
 
-            if (strpos($v, 'Content-Type:') === 0 && $isPostFields) {
+            if (str_starts_with($v, 'Content-Type:') && $isPostFields) {
                 $v = 'Disabled-' . $v;
             }
             $result[] = " -H '" . $v . "'";
@@ -67,15 +67,19 @@ class CurlHook extends Hook
         if (isset($options[CURLOPT_TIMEOUT])) {
             $result[] = " --max-time '" . $options[CURLOPT_TIMEOUT] . "'";
         }
+
         if (isset($options[CURLOPT_CONNECTTIMEOUT])) {
             $result[] = " --connect-timeout '" . $options[CURLOPT_CONNECTTIMEOUT] . "'";
         }
+
         if (isset($options[CURLOPT_CONNECTTIMEOUT_MS])) {
             $result[] = " --connect-timeout  '" . round($options[CURLOPT_CONNECTTIMEOUT_MS] / 1000, 3) . "'";
         }
+
         if (isset($options[CURLOPT_HTTP_VERSION])) {
             $result[] = ' ' . (self::CURL_VERSIONS[$options[CURLOPT_HTTP_VERSION]] ?? '');
         }
+
         if (isset($options[CURLOPT_UPLOAD])) {
             $result[] = " --upload '" . $options[CURLOPT_UPLOAD] . "' ";
         }
@@ -90,11 +94,12 @@ class CurlHook extends Hook
 
         if ($isPostFields) {
             $fields = explode('&', $options[CURLOPT_POSTFIELDS]);
+
             foreach ($fields as $index => $field) {
                 $result[] = " -F '" . urldecode($field) . "' ";
             }
         } elseif ($data) {
-            $result[] = " --data '$data'";
+            $result[] = " --data '{$data}'";
         }
 
         return implode(" \\\n", $result);
@@ -115,7 +120,7 @@ class CurlHook extends Hook
 
         if (!empty($options[CURLOPT_READFUNCTION])) {
             $func = $options[CURLOPT_READFUNCTION];
-            \curl_setopt($ch, CURLOPT_READFUNCTION, function ($ch, $fh, $length) use (&$func, &$data) {
+            \curl_setopt($ch, CURLOPT_READFUNCTION, static function ($ch, $fh, $length) use (&$func, &$data) {
                 $ret = $func($ch, $fh, $length);
                 error_log('CURL> ' . $ret);
 
@@ -126,7 +131,7 @@ class CurlHook extends Hook
         $isWriteFunction = !isset($options[CURLE_ABORTED_BY_CALLBACK]) && isset($options[CURLOPT_WRITEFUNCTION]);
 
         if ($isWriteFunction) {
-            \curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($ch, $str) use ($options) {
+            \curl_setopt($ch, CURLOPT_WRITEFUNCTION, static function ($ch, $str) use ($options) {
                 self::log('curl write> ' . $str);
 
                 if (isset($options[CURLOPT_WRITEFUNCTION])) {
@@ -147,6 +152,7 @@ class CurlHook extends Hook
 
         if (!$isWriteFunction) {
             $file = $options[CURLOPT_FILE] ?? null;
+
             if (is_resource($file)) {
                 $pos = ftell($file);
                 fseek($file, 0);
