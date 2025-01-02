@@ -140,4 +140,60 @@ final class InterceptorTest extends TestCase
         self::assertStringContainsString('headers', $server_output);
         self::assertStringContainsString('curl -vX POST', $logs[0]);
     }
+
+    public function testRdKafkaProducer(): void
+    {
+        if (!class_exists('RdKafka\Producer')) {
+            self::markTestSkipped('RdKafka\Producer not exists');
+        }
+
+        $conf = new RdKafka\Conf();
+        $producer = new RdKafka\Producer($conf);
+        $producer->addBrokers('localhost:9092');
+        $topic = $producer->newTopic('test');
+        self::assertNotNull($topic);
+
+        $logs = $this->getLogs();
+        self::assertStringContainsString('RdKafka\Producer::__construct', $logs[0]);
+        self::assertStringContainsString('RdKafka\Producer::addBrokers', $logs[1]);
+        self::assertStringContainsString('RdKafka\Producer::newTopic', $logs[2]);
+    }
+
+    public function testRdKafkaConsumer(): void
+    {
+        if (!class_exists('RdKafka\Consumer')) {
+            self::markTestSkipped('RdKafka\Consumer not exists');
+        }
+
+        $conf = new RdKafka\Conf();
+        $consumer = new RdKafka\Consumer($conf);
+        $consumer->addBrokers('localhost:9092');
+        $topic = $consumer->newTopic('test');
+        self::assertNotNull($topic);
+
+        $logs = $this->getLogs();
+        self::assertStringContainsString('RdKafka\Consumer::__construct', $logs[0]);
+        self::assertStringContainsString('RdKafka\Consumer::addBrokers', $logs[1]);
+        self::assertStringContainsString('RdKafka\Consumer::newTopic', $logs[2]);
+    }
+
+    public function testRdKafkaKafkaConsumer(): void
+    {
+        if (!class_exists('RdKafka\KafkaConsumer')) {
+            self::markTestSkipped('RdKafka\KafkaConsumer not exists');
+        }
+
+        $conf = new RdKafka\Conf();
+        $conf->set('group.id', 'testGroup');
+        $conf->set('metadata.broker.list', 'localhost:9092');
+        $consumer = new RdKafka\KafkaConsumer($conf);
+        $consumer->subscribe(['test']);
+        $message = $consumer->consume(1000);
+        self::assertNotNull($message);
+
+        $logs = $this->getLogs();
+        self::assertStringContainsString('RdKafka\KafkaConsumer::__construct', $logs[0]);
+        self::assertStringContainsString('RdKafka\KafkaConsumer::subscribe', $logs[1]);
+        self::assertStringContainsString('RdKafka\KafkaConsumer::consume', $logs[2]);
+    }
 }

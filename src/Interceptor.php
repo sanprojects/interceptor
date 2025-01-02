@@ -8,6 +8,7 @@ use Sanprojects\Interceptor\Hooks\FileHook;
 use Sanprojects\Interceptor\Hooks\MysqliHook;
 use Sanprojects\Interceptor\Hooks\PDOHook;
 use Sanprojects\Interceptor\Hooks\RedisHook;
+use Sanprojects\Interceptor\Hooks\RdKafka\RdKafkaHook;
 use Sanprojects\Interceptor\Logger\Logger;
 
 class Interceptor
@@ -52,7 +53,8 @@ class Interceptor
             ->addHook([new AMQPHook(), 'filter'])
             ->addHook([new RedisHook(), 'filter'])
             ->addHook([new MysqliHook(), 'filter'])
-            ->addHook([new PDOHook(), 'filter']);
+            ->addHook([new PDOHook(), 'filter'])
+            ->addHook([new RdKafkaHook(), 'filter']);
     }
 
     public static function interceptAll(): self
