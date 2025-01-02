@@ -5,6 +5,7 @@
 test:
 	docker run --rm -ti -d --name=mysql -p3306:3306 -e MYSQL_ROOT_PASSWORD=toor yobasystems/alpine-mariadb
 	docker run --rm -ti -d --name=redis -p6379:6379 redis
+	docker run --rm -ti -d --name kafka -p9092:9092 apache/kafka:latest
 	./vendor/bin/phpunit --bootstrap tests/bootstrap.php tests || exit
 
 install:
