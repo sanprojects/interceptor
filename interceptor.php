@@ -33,3 +33,4 @@ function isCliApp(): bool {
 
     return str_contains($appName, 'interceptor.ph');
 }
+

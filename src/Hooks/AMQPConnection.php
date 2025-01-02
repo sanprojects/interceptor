@@ -17,3 +17,4 @@ class AMQPConnection extends \AMQPConnection
         );
     }
 }
+

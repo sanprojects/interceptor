@@ -9,3 +9,4 @@ class AMQPHook extends Hook
         \AMQPExchange::class => AMQPExchange::class,
     ];
 }
+
