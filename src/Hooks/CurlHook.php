@@ -23,7 +23,7 @@ class CurlHook extends Hook
      */
     protected static $curlOpts = [];
 
-    public static function curl_setopt_array($ch, $options)
+    public static function curl_setopt_array($ch, array $options): bool
     {
         $chNumber = (int) $ch;
         self::$curlOpts[$chNumber] = self::$curlOpts[$chNumber] ?? [];
@@ -32,7 +32,7 @@ class CurlHook extends Hook
         return call_user_func_array(__FUNCTION__, func_get_args());
     }
 
-    public static function curl_setopt($ch, $option, $value)
+    public static function curl_setopt($ch, int $option, $value): bool
     {
         $chNumber = (int) $ch;
         self::$curlOpts[$chNumber] = self::$curlOpts[$chNumber] ?? [];
@@ -41,7 +41,7 @@ class CurlHook extends Hook
         return call_user_func_array(__FUNCTION__, func_get_args());
     }
 
-    public static function curlOptionsToCommand($options)
+    public static function curlOptionsToCommand(array $options): string
     {
         $result = [];
 
@@ -160,7 +160,7 @@ class CurlHook extends Hook
         return $content;
     }
 
-    public static function curl_multi_exec($multi_handle, &$still_running = 0)
+    public static function curl_multi_exec($multi_handle, int &$still_running = 0): int
     {
         $status = curl_multi_exec($multi_handle, $still_running);
 

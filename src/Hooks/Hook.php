@@ -12,7 +12,13 @@ class Hook
     protected const HOOKED_CLASSES = [];
     private static $disableHook = false;
 
-    public function filter(string $code): string
+    /**
+     * Filters the provided code to apply hooks.
+     *
+     * @param string $code The code to be filtered.
+     * @return string The filtered code.
+     */
+    public function filter(string $code): string 
     {
         // don't intercept hooks
         if ($this->getNamespace($code) === __NAMESPACE__) {
@@ -46,7 +52,14 @@ class Hook
         return preg_replace(array_keys($patterns), array_values($patterns), $code);
     }
 
-    public function getClassUse(string $code, string $class): string
+    /**
+     * Retrieves the class use statement from the provided code.
+     *
+     * @param string $code The code to search for the class use statement.
+     * @param string $class The class name to search for.
+     * @return string The class use statement if found, otherwise an empty string.
+     */
+    public function getClassUse(string $code, string $class): string 
     {
         if (preg_match('@\buse\s+?([\\\\]*?' . preg_quote($class, '/') . ')\b@', $code, $matches)) {
             return $matches[1];
@@ -57,14 +70,26 @@ class Hook
             : '';
     }
 
-    public function getNamespace(string $code): string
+    /**
+     * Retrieves the namespace from the provided code.
+     *
+     * @param string $code The code to search for the namespace.
+     * @return string The namespace if found, otherwise an empty string.
+     */
+    public function getNamespace(string $code): string 
     {
         return preg_match('@\bnamespace\s+?([\w\\\\]+?);@', $code, $matches)
             ? $matches[1]
             : '';
     }
 
-    public function getClassShortName(string $classFullName): string
+    /**
+     * Retrieves the short name of the class from its full name.
+     *
+     * @param string $classFullName The full name of the class.
+     * @return string The short name of the class.
+     */
+    public function getClassShortName(string $classFullName): string 
     {
         $classParts = explode('\\', $classFullName);
 
@@ -72,24 +97,37 @@ class Hook
     }
 
     /**
-     * {@inheritdoc}
+     * Logs the provided message and data.
+     *
+     * @param string $message The message to be logged.
+     * @param mixed $data The data to be logged.
      */
-    public static function log(string $message, $data = []): void
+    public static function log(string $message, $data = []): void 
     {
         Di::get(Logger::class)->debug($message, $data);
     }
 
-    public static function hookFunction($callble, array $args, array $extra = [], $name = '')
+    /**
+     * Hooks a function call and logs the result.
+     *
+     * @param callable $callable The function to be hooked.
+     * @param array $args The arguments to be passed to the function.
+     * @param array $extra Additional data to be logged.
+     * @param string $name The name of the function.
+     * @return mixed The result of the function call.
+     * @throws \Exception If the function call throws an exception.
+     */
+    public static function hookFunction($callable, array $args, array $extra = [], $name = '') 
     {
         // prevent hook inside another hook
         if (self::$disableHook) {
-            return call_user_func_array($callble, $args);
+            return call_user_func_array($callable, $args);
         }
 
         self::$disableHook = true;
-        $funcName = $name ?: self::getCallableName($callble);
+        $funcName = $name ?: self::getCallableName($callable);
         try {
-            $result = call_user_func_array($callble, $args);
+            $result = call_user_func_array($callable, $args);
         } catch (\Exception $e) {
             $args = $extra ?: $args;
             $args[] = $e->getMessage();
@@ -105,17 +143,36 @@ class Hook
         return $result;
     }
 
-    public static function __callStatic($name, $args)
+    /**
+     * Handles static method calls and hooks the function call.
+     *
+     * @param string $name The name of the method.
+     * @param array $args The arguments to be passed to the method.
+     * @return mixed The result of the method call.
+     */
+    public static function __callStatic($name, $args) 
     {
         return self::hookFunction($name, $args);
     }
 
-    public static function performResult($result)
+    /**
+     * Processes the result of a function call.
+     *
+     * @param mixed $result The result of the function call.
+     * @return mixed The processed result.
+     */
+    public static function performResult($result) 
     {
         return $result;
     }
 
-    static function getCallableName($callable): string
+    /**
+     * Retrieves the name of the callable.
+     *
+     * @param callable $callable The callable to retrieve the name from.
+     * @return string The name of the callable.
+     */
+    static function getCallableName($callable): string 
     {
         if (is_string($callable)) {
             return trim($callable);
