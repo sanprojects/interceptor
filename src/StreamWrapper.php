@@ -519,12 +519,9 @@ class StreamWrapper extends php_user_filter
      * Write to stream.
      *
      * @see http://www.php.net/manual/en/streamwrapper.stream-write.php
-     *
      * @param string $data should be stored into the underlying stream
-     *
-     * @return int|false
-     *
      * @throws BadMethodCallException if called, because this method is not applicable for this stream
+     * @return int|false
      */
     public function stream_write(string $data)
     {

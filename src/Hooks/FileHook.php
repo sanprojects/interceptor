@@ -88,13 +88,13 @@ class FileHook extends Hook
     private static function isExcluded($handler, $fileName = '')
     {
         if (defined('STDIN')) {
-            if ($handler && in_array($handler, [STDIN, STDERR, STDOUT])) {
+            if ($handler && in_array($handler, [STDIN, STDERR, STDOUT], true)) {
                 return true;
             }
         }
 
         $filename = $fileName ?: (self::$fileHandlers[(int) $handler] ?? '');
 
-        return (bool) in_array($filename, self::EXCLUDED_FILENAMES);
+        return in_array($filename, self::EXCLUDED_FILENAMES, true);
     }
 }
