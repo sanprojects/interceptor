@@ -3,11 +3,12 @@
 
 use Sanprojects\Interceptor\Interceptor;
 
-spl_autoload_register(function ($class) {
-    $prefix = 'Sanprojects\\Interceptor';
+spl_autoload_register(function ($class): void {
+    $prefix = 'Sanprojects\Interceptor';
     $baseDir = __DIR__ . '/src/';
 
     $len = strlen($prefix);
+
     if (strncmp($prefix, $class, $len) !== 0) {
         return;
     }
@@ -28,7 +29,8 @@ if (isCliApp()) {
     include $argv[0];
 }
 
-function isCliApp(): bool {
+function isCliApp(): bool
+{
     $appName = $_SERVER['argv'][0] ?? '';
 
     return str_contains($appName, 'interceptor.ph');

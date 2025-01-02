@@ -5,4 +5,4 @@ $phar->buildFromDirectory(__DIR__, '/^(?!.*vendor).*php$/');
 $phar->setDefaultStub('interceptor.php', 'interceptor.php');
 $phar->compress(Phar::GZ);
 $phar->stopBuffering();
-echo "Phar archive created successfully.";
+echo 'Phar archive created successfully.';

@@ -17,13 +17,11 @@ class Interceptor
      */
     protected static array $hooks = [];
 
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     public function intercept(): void
     {
-        $codeTransformer = function (string $code) {
+        $codeTransformer = static function (string $code) {
             foreach (static::$hooks as $codeTransformer) {
                 $code = $codeTransformer($code);
             }
@@ -59,7 +57,7 @@ class Interceptor
 
     public static function interceptAll(): self
     {
-        $interceptor = new Interceptor();
+        $interceptor = new self();
         $interceptor
             ->addAllHooks()
             ->intercept();

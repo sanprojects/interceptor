@@ -3,6 +3,9 @@
 namespace Sanprojects\Interceptor;
 
 use Closure;
+use BadMethodCallException;
+use Exception;
+use php_user_filter;
 
 /**
  * Implementation adapted from:
@@ -15,7 +18,7 @@ use Closure;
  * @see       https://github.com/php-vcr/php-vcr/blob/master/src/VCR/Util/StreamProcessor.php
  * @see       https://github.com/goaop/ast-manipulator/blob/master/src/Hook/StreamWrapperHook.php
  */
-class StreamWrapper extends \php_user_filter
+class StreamWrapper extends php_user_filter
 {
     /**
      * Constant for a stream which was opened while including a file.
@@ -34,7 +37,7 @@ class StreamWrapper extends \php_user_filter
      */
     protected $resource;
 
-    static protected string $path;
+    protected static string $path;
 
     /**
      * @see http://www.php.net/manual/en/class.streamwrapper.php#streamwrapper.props.context
@@ -43,9 +46,6 @@ class StreamWrapper extends \php_user_filter
      */
     public $context;
 
-    /**
-     * @var bool
-     */
     protected bool $isIntercepting = false;
 
     private string $code = '';
@@ -54,9 +54,7 @@ class StreamWrapper extends \php_user_filter
 
     private static Closure $filterCallBack;
 
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     /**
      * Registers current class as the PHP file stream wrapper.
@@ -89,7 +87,7 @@ class StreamWrapper extends \php_user_filter
      */
     protected function isPhpFile(string $uri): bool
     {
-        return 'php' === pathinfo($uri, PATHINFO_EXTENSION);
+        return pathinfo($uri, PATHINFO_EXTENSION) === 'php';
     }
 
     protected function shouldProcess(string $uri): bool
@@ -113,7 +111,7 @@ class StreamWrapper extends \php_user_filter
     public function stream_open(string $path, string $mode, int $options, ?string &$openedPath): bool
     {
         // file_exists catches paths like /dev/urandom that are missed by is_file.
-        if ('r' === substr($mode, 0, 1) && !file_exists($path)) {
+        if (substr($mode, 0, 1) === 'r' && !file_exists($path)) {
             return false;
         }
 
@@ -127,13 +125,13 @@ class StreamWrapper extends \php_user_filter
 
         self::$path = $path;
 
-        if (false !== $this->resource && $options & self::STREAM_OPEN_FOR_INCLUDE && $this->shouldProcess($path)) {
+        if ($this->resource !== false && $options & self::STREAM_OPEN_FOR_INCLUDE && $this->shouldProcess($path)) {
             $this->appendFiltersToStream($this->resource);
         }
 
         $this->registerWrapper();
 
-        return false !== $this->resource;
+        return $this->resource !== false;
     }
 
     /**
@@ -143,7 +141,7 @@ class StreamWrapper extends \php_user_filter
      */
     public function stream_close(): bool
     {
-        if (false === $this->resource) {
+        if ($this->resource === false) {
             return true;
         }
 
@@ -160,7 +158,7 @@ class StreamWrapper extends \php_user_filter
      */
     public function stream_eof(): bool
     {
-        if (false === $this->resource) {
+        if ($this->resource === false) {
             return false;
         }
 
@@ -174,7 +172,7 @@ class StreamWrapper extends \php_user_filter
      */
     public function stream_flush(): bool
     {
-        if (false === $this->resource) {
+        if ($this->resource === false) {
             return false;
         }
 
@@ -193,7 +191,7 @@ class StreamWrapper extends \php_user_filter
      */
     public function stream_read(int $count)
     {
-        if (false === $this->resource) {
+        if ($this->resource === false) {
             return false;
         }
 
@@ -213,11 +211,11 @@ class StreamWrapper extends \php_user_filter
      */
     public function stream_seek(int $offset, int $whence = SEEK_SET): bool
     {
-        if (false === $this->resource) {
+        if ($this->resource === false) {
             return false;
         }
 
-        return 0 === fseek($this->resource, $offset, $whence);
+        return fseek($this->resource, $offset, $whence) === 0;
     }
 
     /**
@@ -233,7 +231,7 @@ class StreamWrapper extends \php_user_filter
      */
     public function stream_stat()
     {
-        if (false === $this->resource) {
+        if ($this->resource === false) {
             return false;
         }
 
@@ -255,7 +253,7 @@ class StreamWrapper extends \php_user_filter
      */
     public function stream_tell()
     {
-        if (false === $this->resource) {
+        if ($this->resource === false) {
             return false;
         }
 
@@ -275,14 +273,16 @@ class StreamWrapper extends \php_user_filter
     public function url_stat(string $path, int $flags)
     {
         $this->restore();
+
         if ($flags & STREAM_URL_STAT_QUIET) {
-            set_error_handler(function () {
+            set_error_handler(static function () {
                 // Use native error handler
                 return false;
             });
+
             try {
                 $result = @stat($path);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
             }
             restore_error_handler();
         } else {
@@ -302,7 +302,7 @@ class StreamWrapper extends \php_user_filter
      */
     public function dir_closedir(): bool
     {
-        if (false === $this->resource) {
+        if ($this->resource === false) {
             return false;
         }
 
@@ -323,6 +323,7 @@ class StreamWrapper extends \php_user_filter
     public function dir_opendir(string $path): bool
     {
         $this->restore();
+
         if (isset($this->context)) {
             $this->resource = opendir($path, $this->context);
         } else {
@@ -330,7 +331,7 @@ class StreamWrapper extends \php_user_filter
         }
         $this->registerWrapper();
 
-        return false !== $this->resource;
+        return $this->resource !== false;
     }
 
     /**
@@ -342,7 +343,7 @@ class StreamWrapper extends \php_user_filter
      */
     public function dir_readdir()
     {
-        if (false === $this->resource) {
+        if ($this->resource === false) {
             return false;
         }
 
@@ -358,7 +359,7 @@ class StreamWrapper extends \php_user_filter
      */
     public function dir_rewinddir(): bool
     {
-        if (false === $this->resource) {
+        if ($this->resource === false) {
             return false;
         }
 
@@ -381,6 +382,7 @@ class StreamWrapper extends \php_user_filter
     public function mkdir(string $path, int $mode, int $options): bool
     {
         $this->restore();
+
         if (isset($this->context)) {
             $result = mkdir($path, $mode, (bool) ($options & STREAM_MKDIR_RECURSIVE), $this->context);
         } else {
@@ -404,6 +406,7 @@ class StreamWrapper extends \php_user_filter
     public function rename(string $path_from, string $path_to): bool
     {
         $this->restore();
+
         if (isset($this->context)) {
             $result = rename($path_from, $path_to, $this->context);
         } else {
@@ -426,6 +429,7 @@ class StreamWrapper extends \php_user_filter
     public function rmdir(string $path): bool
     {
         $this->restore();
+
         if (isset($this->context)) {
             $result = rmdir($path, $this->context);
         } else {
@@ -462,11 +466,11 @@ class StreamWrapper extends \php_user_filter
      */
     public function stream_lock(int $operation): bool
     {
-        if (false === $this->resource) {
+        if ($this->resource === false) {
             return false;
         }
 
-        $operation = (0 === $operation ? LOCK_EX : $operation);
+        $operation = ($operation === 0 ? LOCK_EX : $operation);
 
         return flock($this->resource, $operation);
     }
@@ -485,24 +489,27 @@ class StreamWrapper extends \php_user_filter
      */
     public function stream_set_option(int $option, int $arg1, int $arg2): bool
     {
-        if (false === $this->resource) {
+        if ($this->resource === false) {
             return false;
         }
 
         switch ($option) {
             case STREAM_OPTION_BLOCKING:
                 return stream_set_blocking($this->resource, (bool) $arg1);
+
             case STREAM_OPTION_READ_TIMEOUT:
                 return stream_set_timeout($this->resource, $arg1, $arg2);
+
             case STREAM_OPTION_WRITE_BUFFER:
                 // stream_set_write_buffer returns 0 in case of success
-                return 0 === stream_set_write_buffer($this->resource, $arg1);
+                return stream_set_write_buffer($this->resource, $arg1) === 0;
+
             case STREAM_OPTION_READ_BUFFER:
                 // stream_set_read_buffer returns 0 in case of success
-                return 0 === stream_set_read_buffer($this->resource, $arg1);
-            // STREAM_OPTION_CHUNK_SIZE does not exist at all in PHP 7
-            /*case STREAM_OPTION_CHUNK_SIZE:
-                return stream_set_chunk_size($this->resource, $arg1);*/
+                return stream_set_read_buffer($this->resource, $arg1) === 0;
+                // STREAM_OPTION_CHUNK_SIZE does not exist at all in PHP 7
+                /*case STREAM_OPTION_CHUNK_SIZE:
+                    return stream_set_chunk_size($this->resource, $arg1);*/
         }
 
         return false;
@@ -511,17 +518,17 @@ class StreamWrapper extends \php_user_filter
     /**
      * Write to stream.
      *
-     * @throws \BadMethodCallException if called, because this method is not applicable for this stream
-     *
      * @see http://www.php.net/manual/en/streamwrapper.stream-write.php
      *
      * @param string $data should be stored into the underlying stream
      *
      * @return int|false
+     *
+     * @throws BadMethodCallException if called, because this method is not applicable for this stream
      */
     public function stream_write(string $data)
     {
-        if (false === $this->resource) {
+        if ($this->resource === false) {
             return false;
         }
 
@@ -540,6 +547,7 @@ class StreamWrapper extends \php_user_filter
     public function unlink(string $path): bool
     {
         $this->restore();
+
         if (isset($this->context)) {
             $result = unlink($path, $this->context);
         } else {
@@ -573,17 +581,24 @@ class StreamWrapper extends \php_user_filter
                 } else {
                     $result = touch($path, $value[0], $value[1]);
                 }
+
                 break;
+
             case STREAM_META_OWNER_NAME:
             case STREAM_META_OWNER:
                 $result = chown($path, $value);
+
                 break;
+
             case STREAM_META_GROUP_NAME:
             case STREAM_META_GROUP:
                 $result = chgrp($path, $value);
+
                 break;
+
             case STREAM_META_ACCESS:
                 $result = chmod($path, $value);
+
                 break;
         }
         $this->registerWrapper();
@@ -602,7 +617,7 @@ class StreamWrapper extends \php_user_filter
      */
     public function stream_truncate(int $new_size): bool
     {
-        if (false === $this->resource) {
+        if ($this->resource === false) {
             return false;
         }
 
@@ -647,13 +662,13 @@ class StreamWrapper extends \php_user_filter
             $this->code = (self::$filterCallBack)($this->code);
 
             if (self::$isDebug) {
-                echo "Source code for " . self::$path . ": \n" . $this->code;
+                echo 'Source code for ' . self::$path . ": \n" . $this->code;
             }
 
             $bufferHandle = fopen('php://temp', 'w+');
             $outBucket = stream_bucket_new($bufferHandle, $this->code);
 
-            if (false === $outBucket) {
+            if ($outBucket === false) {
                 return PSFS_ERR_FATAL;
             }
 

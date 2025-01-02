@@ -54,6 +54,7 @@ class FileHook extends Hook
         $filename = self::$fileHandlers[(int) $handler] ?? '';
         $args = func_get_args();
         $args[0] = $filename;
+
         return self::hookFunction(__FUNCTION__, func_get_args(), $args);
     }
 
@@ -66,6 +67,7 @@ class FileHook extends Hook
         $filename = self::$fileHandlers[(int) $handler] ?? '';
         $args = func_get_args();
         $args[0] = $filename;
+
         return self::hookFunction(__FUNCTION__, func_get_args(), $args);
     }
 
@@ -79,6 +81,7 @@ class FileHook extends Hook
 
         $args = func_get_args();
         $args[0] = $filename;
+
         return self::hookFunction(__FUNCTION__, func_get_args(), $args);
     }
 
@@ -92,10 +95,6 @@ class FileHook extends Hook
 
         $filename = $fileName ?: (self::$fileHandlers[(int) $handler] ?? '');
 
-        if (in_array($filename, self::EXCLUDED_FILENAMES)) {
-            return true;
-        }
-
-        return false;
+        return (bool) in_array($filename, self::EXCLUDED_FILENAMES);
     }
 }

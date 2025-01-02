@@ -2,9 +2,6 @@
 
 namespace Sanprojects\Interceptor;
 
-use DI\Container;
-use DI\ContainerBuilder;
-use DI\Definition\Helper\DefinitionHelper;
 use Sanprojects\Interceptor\Logger\ArrayHandler;
 use Sanprojects\Interceptor\Logger\Logger;
 use Sanprojects\Interceptor\Logger\StdErrHandler;
@@ -36,15 +33,11 @@ class Di
 
         $isBuilt = true;
 
-        self::set(ArrayHandler::class, function() {
-            return new ArrayHandler();
-        });
+        self::set(ArrayHandler::class, static fn() => new ArrayHandler());
 
-        self::set(Logger::class, function() {
-            return new Logger('Interceptor', [
-                new StdErrHandler(),
-                self::get(ArrayHandler::class)
-            ]);
-        });
+        self::set(Logger::class, static fn() => new Logger('Interceptor', [
+            new StdErrHandler(),
+            self::get(ArrayHandler::class),
+        ]));
     }
 }

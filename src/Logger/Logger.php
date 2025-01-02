@@ -1,8 +1,10 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Sanprojects\Interceptor\Logger;
 
-use DateTime;
+use DateTimeImmutable;
 
 class Logger
 {
@@ -10,13 +12,11 @@ class Logger
         private string $title = '',
         private array $handlers = [],
         private $maxLineLength = 100000,
-    )
-    {
-    }
+    ) {}
 
     public function debug(string $message, array $data = []): void
     {
-        $formatedMessage = '[' . (new DateTime())->format('Y-m-d\TH:i:s.u\Z') . '] '
+        $formatedMessage = '[' . (new DateTimeImmutable())->format('Y-m-d\TH:i:s.u\Z') . '] '
             . $this->title . '.DEBUG: '
             . $message . ' '
             . $this->convertToString($data);
@@ -26,9 +26,6 @@ class Logger
         }
     }
 
-    /**
-     * @param int $maxLineLength
-     */
     public function setMaxLineLength(int $maxLineLength): void
     {
         $this->maxLineLength = $maxLineLength;
@@ -45,7 +42,7 @@ class Logger
 
     protected function _convertToString($data): string
     {
-        if (null === $data || is_bool($data)) {
+        if ($data === null || is_bool($data)) {
             return var_export($data, true);
         }
 
@@ -62,7 +59,7 @@ class Logger
 
     protected function toString($data): string
     {
-        if (null === $data || is_bool($data)) {
+        if ($data === null || is_bool($data)) {
             return var_export($data, true);
         }
 
