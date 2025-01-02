@@ -3,6 +3,7 @@
 namespace Sanprojects\Interceptor\Hooks\RdKafka;
 
 use RdKafka\Consumer as RdKafkaConsumer;
+use RdKafka\TopicConf;
 use Sanprojects\Interceptor\Hooks\Hook;
 
 class Consumer extends RdKafkaConsumer
@@ -17,23 +18,19 @@ class Consumer extends RdKafkaConsumer
         );
     }
 
-    public function consume($timeout_ms)
+    public function newTopic($topic_name, TopicConf $topic_conf = null)
     {
         return Hook::hookFunction(
-            fn() => parent::consume(...func_get_args()),
+            fn() => parent::newTopic(...func_get_args()),
             func_get_args(),
-            [],
-            'RdKafka\Consumer::consume'
         );
     }
 
-    public function commit($message = null)
+    public function newQueue()
     {
         return Hook::hookFunction(
-            fn() => parent::commit(...func_get_args()),
+            fn() => parent::newQueue(),
             func_get_args(),
-            [],
-            'RdKafka\Consumer::commit'
         );
     }
 }
