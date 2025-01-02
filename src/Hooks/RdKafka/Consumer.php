@@ -18,7 +18,7 @@ class Consumer extends RdKafkaConsumer
         );
     }
 
-    public function newTopic($topic_name, TopicConf $topic_conf = null)
+    public function newTopic($topic_name, ?TopicConf $topic_conf = null)
     {
         return Hook::hookFunction(
             fn() => parent::newTopic(...func_get_args()),
