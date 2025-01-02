@@ -27,7 +27,7 @@ class KafkaConsumer extends RdKafkaKafkaConsumer
         );
     }
 
-    public function commit($message = null)
+    public function commit($message_or_offsets = null)
     {
         return Hook::hookFunction(
             fn() => parent::commit(...func_get_args()),

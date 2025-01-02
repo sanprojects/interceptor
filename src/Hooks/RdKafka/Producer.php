@@ -17,23 +17,43 @@ class Producer extends RdKafkaProducer
         );
     }
 
-    public function produce($topic, $partition, $msgflags, $payload, $key = null, $headers = null)
-    {
-        return Hook::hookFunction(
-            fn() => parent::produce(...func_get_args()),
-            func_get_args(),
-            [],
-            'RdKafka\Producer::produce'
-        );
-    }
-
     public function flush($timeout_ms)
     {
         return Hook::hookFunction(
             fn() => parent::flush(...func_get_args()),
             func_get_args(),
-            [],
-            'RdKafka\Producer::flush'
+        );
+    }
+
+    public function initTransactions(int $timeoutMs)
+    {
+        return Hook::hookFunction(
+            fn() => parent::initTransactions(...func_get_args()),
+            func_get_args(),
+        );
+    }
+
+    public function beginTransaction()
+    {
+        return Hook::hookFunction(
+            fn() => parent::beginTransaction(...func_get_args()),
+            func_get_args(),
+        );
+    }
+
+    public function commitTransaction(int $timeoutMs)
+    {
+        return Hook::hookFunction(
+            fn() => parent::commitTransaction(...func_get_args()),
+            func_get_args(),
+        );
+    }
+
+    public function abortTransaction(int $timeoutMs)
+    {
+        return Hook::hookFunction(
+            fn() => parent::abortTransaction(...func_get_args()),
+            func_get_args(),
         );
     }
 }
