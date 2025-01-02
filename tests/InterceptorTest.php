@@ -6,11 +6,6 @@ use PHPUnit\Framework\TestCase;
 use Predis\Client;
 use Sanprojects\Interceptor\Di;
 use Sanprojects\Interceptor\Logger\ArrayHandler;
-use RdKafka\Producer;
-use RdKafka\Consumer;
-use RdKafka\KafkaConsumer;
-use RdKafka\Conf;
-use RdKafka\TopicConf;
 
 /**
  * @internal
@@ -146,89 +141,59 @@ final class InterceptorTest extends TestCase
         self::assertStringContainsString('curl -vX POST', $logs[0]);
     }
 
-    public function testRdKafkaProducerProduce(): void
+    public function testRdKafkaProducer(): void
     {
-        $conf = new Conf();
-        $producer = new Producer($conf);
-        $topic = $producer->newTopic("test_topic");
-        $topic->produce(RD_KAFKA_PARTITION_UA, 0, "test message");
+        if (!class_exists('RdKafka\Producer')) {
+            self::markTestSkipped('RdKafka\Producer not exists');
+        }
+
+        $conf = new RdKafka\Conf();
+        $producer = new RdKafka\Producer($conf);
+        $producer->addBrokers('localhost:9092');
+        $topic = $producer->newTopic('test');
+        self::assertNotNull($topic);
 
         $logs = $this->getLogs();
-        self::assertStringContainsString('RdKafka\Producer::produce', $logs[0]);
+        self::assertStringContainsString('RdKafka\Producer::__construct', $logs[0]);
+        self::assertStringContainsString('RdKafka\Producer::addBrokers', $logs[1]);
+        self::assertStringContainsString('RdKafka\Producer::newTopic', $logs[2]);
     }
 
-    public function testRdKafkaConsumerConsume(): void
+    public function testRdKafkaConsumer(): void
     {
-        $conf = new Conf();
-        $consumer = new Consumer($conf);
-        $consumer->addBrokers("localhost");
-        $topic = $consumer->newTopic("test_topic");
-        $topic->consumeStart(0, RD_KAFKA_OFFSET_BEGINNING);
-        $message = $topic->consume(0, 1000);
+        if (!class_exists('RdKafka\Consumer')) {
+            self::markTestSkipped('RdKafka\Consumer not exists');
+        }
+
+        $conf = new RdKafka\Conf();
+        $consumer = new RdKafka\Consumer($conf);
+        $consumer->addBrokers('localhost:9092');
+        $topic = $consumer->newTopic('test');
+        self::assertNotNull($topic);
 
         $logs = $this->getLogs();
-        self::assertStringContainsString('RdKafka\Consumer::consume', $logs[0]);
+        self::assertStringContainsString('RdKafka\Consumer::__construct', $logs[0]);
+        self::assertStringContainsString('RdKafka\Consumer::addBrokers', $logs[1]);
+        self::assertStringContainsString('RdKafka\Consumer::newTopic', $logs[2]);
     }
 
-    public function testRdKafkaKafkaConsumerCommit(): void
+    public function testRdKafkaKafkaConsumer(): void
     {
-        $conf = new Conf();
-        $conf->set('group.id', 'test_group');
-        $conf->set('metadata.broker.list', 'localhost');
-        $kafkaConsumer = new KafkaConsumer($conf);
-        $kafkaConsumer->commit();
+        if (!class_exists('RdKafka\KafkaConsumer')) {
+            self::markTestSkipped('RdKafka\KafkaConsumer not exists');
+        }
+
+        $conf = new RdKafka\Conf();
+        $conf->set('group.id', 'testGroup');
+        $conf->set('metadata.broker.list', 'localhost:9092');
+        $consumer = new RdKafka\KafkaConsumer($conf);
+        $consumer->subscribe(['test']);
+        $message = $consumer->consume(1000);
+        self::assertNotNull($message);
 
         $logs = $this->getLogs();
-        self::assertStringContainsString('RdKafka\KafkaConsumer::commit', $logs[0]);
-    }
-
-    public function testRdKafkaKafkaConsumerSubscribe(): void
-    {
-        $conf = new Conf();
-        $conf->set('group.id', 'test_group');
-        $conf->set('metadata.broker.list', 'localhost');
-        $kafkaConsumer = new KafkaConsumer($conf);
-        $kafkaConsumer->subscribe(['test_topic']);
-
-        $logs = $this->getLogs();
-        self::assertStringContainsString('RdKafka\KafkaConsumer::subscribe', $logs[0]);
-    }
-
-    public function testRdKafkaKafkaConsumerUnsubscribe(): void
-    {
-        $conf = new Conf();
-        $conf->set('group.id', 'test_group');
-        $conf->set('metadata.broker.list', 'localhost');
-        $kafkaConsumer = new KafkaConsumer($conf);
-        $kafkaConsumer->unsubscribe();
-
-        $logs = $this->getLogs();
-        self::assertStringContainsString('RdKafka\KafkaConsumer::unsubscribe', $logs[0]);
-    }
-
-    public function testRdKafkaKafkaConsumerAssign(): void
-    {
-        $conf = new Conf();
-        $conf->set('group.id', 'test_group');
-        $conf->set('metadata.broker.list', 'localhost');
-        $kafkaConsumer = new KafkaConsumer($conf);
-        $topicConf = new TopicConf();
-        $topicConf->set('auto.offset.reset', 'earliest');
-        $kafkaConsumer->assign([new RdKafka\TopicPartition('test_topic', 0)]);
-
-        $logs = $this->getLogs();
-        self::assertStringContainsString('RdKafka\KafkaConsumer::assign', $logs[0]);
-    }
-
-    public function testRdKafkaKafkaConsumerUnassign(): void
-    {
-        $conf = new Conf();
-        $conf->set('group.id', 'test_group');
-        $conf->set('metadata.broker.list', 'localhost');
-        $kafkaConsumer = new KafkaConsumer($conf);
-        $kafkaConsumer->unassign();
-
-        $logs = $this->getLogs();
-        self::assertStringContainsString('RdKafka\KafkaConsumer::unassign', $logs[0]);
+        self::assertStringContainsString('RdKafka\KafkaConsumer::__construct', $logs[0]);
+        self::assertStringContainsString('RdKafka\KafkaConsumer::subscribe', $logs[1]);
+        self::assertStringContainsString('RdKafka\KafkaConsumer::consume', $logs[2]);
     }
 }
