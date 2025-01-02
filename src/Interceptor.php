@@ -8,7 +8,7 @@ use Sanprojects\Interceptor\Hooks\FileHook;
 use Sanprojects\Interceptor\Hooks\MysqliHook;
 use Sanprojects\Interceptor\Hooks\PDOHook;
 use Sanprojects\Interceptor\Hooks\RedisHook;
-use Sanprojects\Interceptor\Hooks\RdKafkaHook;
+use Sanprojects\Interceptor\Hooks\RdKafka\RdKafkaHook;
 use Sanprojects\Interceptor\Logger\Logger;
 
 class Interceptor
